@@ -7,6 +7,7 @@ The key feature of Volley are:
 * **Send a scenario:** Send JMX file and data files to the Master.
 * **Run:** Run Stress/Load testing.
 * **Fetch a report:** Fetch a report from the Master. 
+* **Server:** Worked as an API Server on the JMeter master side. Execute Remote JMeter Server from the client request.  
 
 ## Getting Started 
 

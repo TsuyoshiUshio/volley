@@ -51,13 +51,11 @@
         "addressPrefix": "10.0.0.0/16",
         "subnetName": "Subnet",
         "subnetPrefix": "10.0.0.0/24",
-        "storageAccountType": "Premium_LRS",
-        "StorageAccountName": "[concat('procvm',uniquestring(resourceGroup().id))]",
         "singleQuote": "'",
         "publicIPAddressName": "jmeterVMPublicIP",
         "publicIPAddressType": "Dynamic",
         "vmName": "jmeterVM",
-        "virtualNetworkName": "proctorVMVNET",
+        "virtualNetworkName": "jmeterVMVNET",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
         "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",        
@@ -66,17 +64,7 @@
     },
     "resources": [
         {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[variables('StorageAccountName')]",
-            "apiVersion": "2018-02-01",
-            "location": "[resourceGroup().location]",
-            "kind": "Storage",
-            "sku": {
-                "name": "[variables('storageAccountType')]"
-            }
-        },
-        {
-            "apiVersion": "2017-11-01",
+            "apiVersion": "2019-09-01",
             "type": "Microsoft.Network/publicIPAddresses",
             "name": "[variables('publicIPAddressName')]",
             "location": "[resourceGroup().location]",
@@ -205,7 +193,7 @@
     "outputs": {
         "ipAddress": {
           "type": "string",
-          "value": "[concat('Microsoft.Network/publicIPAddresses/', variables('properties.ipAddress'))]"
+          "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).ipAddress]"
         }
       }
 }

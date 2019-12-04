@@ -125,7 +125,6 @@
             "name": "[variables('vmName')]",
             "location": "[resourceGroup().location]",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('StorageAccountName'))]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
             "properties": {
@@ -193,7 +192,7 @@
     "outputs": {
         "ipAddress": {
           "type": "string",
-          "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))).ipAddress]"
+          "value": "[reference(variables('publicIPAddressName')).ipAddress]"
         }
       }
 }

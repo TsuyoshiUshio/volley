@@ -27,6 +27,12 @@ func main() {
 					},
 				}, 
 			},
+			{
+				Name: "server",
+				Aliases: []string{"s"},
+				Usage: "API Server for uploading/receiving files",
+				Action: (&command.ServerCommand{}).Start,
+			},
 		},		
 	}
 

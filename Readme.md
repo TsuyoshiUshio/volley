@@ -1,5 +1,5 @@
 # Volley
-Volley is a command line tool for managing JMeter Cluster.
+Volley is a command line tool for managing a JMeter Cluster.
 
 The key feature of Volley are: 
 

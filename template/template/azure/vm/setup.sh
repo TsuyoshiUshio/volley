@@ -95,8 +95,8 @@ export CUSTOM_PLUGIN_VERSION=2.9
 
 wget http://www-us.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz && \
 	tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /usr/local/
-RUN wget https://jmeter-plugins.org/files/packages/jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip
-RUN unzip -o jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip -d ${JMETER_HOME}
+wget https://jmeter-plugins.org/files/packages/jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip
+unzip -o jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip -d ${JMETER_HOME}
 
 
 sudo DEBIAN_FRONTEND=noninteractive rm -rf apache-jmeter-${JMETER_VERSION}.tgz \

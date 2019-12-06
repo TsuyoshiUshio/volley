@@ -24,6 +24,8 @@ func Start(c *gin.Context) {
 		return
 	}
 
+	// start with initialize RunContext then execute with go routine. 
+
 	path := filepath.Join(".", model.JobDir, job_id.String())
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModeDir)

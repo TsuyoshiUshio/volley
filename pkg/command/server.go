@@ -1,13 +1,12 @@
 package command
 
 import (
-	"context"
+	"github.com/TsuyoshiUshio/volley/pkg/controller"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 	"github.com/gin-gonic/gin"
 	"github.com/urfave/cli/v2"
 )
@@ -23,6 +22,9 @@ func (s *ServerCommand) Start(c *cli.Context) error {
 			"message": "hello server",
 		})
 	})
+
+	router.POST("/job", controller.Start)
+	
 	
 	srv := &http.Server {
 		Addr: ":8080",

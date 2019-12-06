@@ -91,11 +91,16 @@ set -eux; \
 export JMETER_VERSION=5.2
 export JMETER_HOME=/usr/local/apache-jmeter-${JMETER_VERSION}
 export PATH=${JMETER_HOME}/bin:${PATH}
+export CUSTOM_PLUGIN_VERSION=2.9
 
 wget http://www-us.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz && \
 	tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /usr/local/
+RUN wget https://jmeter-plugins.org/files/packages/jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip
+RUN unzip -o jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip -d ${JMETER_HOME}
+
 
 sudo DEBIAN_FRONTEND=noninteractive rm -rf apache-jmeter-${JMETER_VERSION}.tgz \
+            jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip \
 			${JMETER_HOME}/bin/examples \
 			${JMETER_HOME}/bin/templates \
 			${JMETER_HOME}/bin/*.cmd \
@@ -106,6 +111,11 @@ sudo DEBIAN_FRONTEND=noninteractive rm -rf apache-jmeter-${JMETER_VERSION}.tgz \
 	apt-get -y --purge autoremove && \
 	apt-get -y clean && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Adding environment variables setup
+echo "# JMeter setup" >> ~/.bashrc
+echo "export JAVA_HOME=${JAVA_HOME}" >> ~/.bashrc
+echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> ~/.bashrc
 
 
 # log directory creation

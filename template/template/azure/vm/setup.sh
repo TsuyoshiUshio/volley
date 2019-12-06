@@ -19,6 +19,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y curl wget
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y gnupg-agent
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y software-properties-common
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y unzip
 
 #Add user to docker usergroup
 sudo DEBIAN_FRONTEND=noninteractive apt-get remove -y unscd

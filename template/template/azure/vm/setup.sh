@@ -113,14 +113,14 @@ sudo DEBIAN_FRONTEND=noninteractive rm -rf apache-jmeter-${JMETER_VERSION}.tgz \
 	apt-get -y clean && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Adding environment variables setup
+# log directory creation
+mkdir -p /home/azureuser/logs
+
+# Adding environment variables setup to azureuser
+su azureuser
 echo "# JMeter setup" >> ~/.bashrc
 echo "export JAVA_HOME=${JAVA_HOME}" >> ~/.bashrc
 echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> ~/.bashrc
-
-
-# log directory creation
-mkdir -p /home/azureuser/logs
 
 # /bin/bash -c 'docker run -d --name docker-daemon --privileged docker:stable-dind &'
 # /bin/bash -c 'docker run -v /home/nginx/config:/home/nginx/config -v /home/nginx/contents:/home/nginx/contents -v /home/azureuser/logs:/home/azureuser/logs -v /var/run/docker.sock:/var/run/docker.sock -d -e  AZUREUSERNAME -e AZUREPASSWORD -e SUBID -e LOCATION -e TEAMNAME -e RECIPIENTEMAIL -e CHATCONNECTIONSTRING -e CHATMESSAGEQUEUE -e TENANTID -e APPID -e GITBRANCH devopsoh/proctor-container &'

@@ -41,7 +41,7 @@ set -eux; \
 	\
 	savedAptMark="$(apt-mark showmanual)"; \
 	wget -O openjdk.tgz "$JAVA_URL"; \
-	echo "$JAVA_SHA256 */openjdk.tgz" | sha256sum -c -; \
+	echo "$JAVA_SHA256 openjdk.tgz" | sha256sum -c -; \
 	\
 	mkdir -p "$JAVA_HOME"; \
 	tar --extract \

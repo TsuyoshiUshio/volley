@@ -2,35 +2,33 @@ package model
 
 import (
 	"os"
+	"encoding/json"
+	"path/filepath"
 )
 
 type Status struct {
 	Status string `json:"status"`
 }
 
-
-
 const (
-	StatusRunning = "running"
+	StatusRunning   = "running"
 	StatusCompleted = "complated"
-	StatusFailed = "failed"
+	StatusFailed    = "failed"
 )
 
-func (s Status) Write(filePath string) error {
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		os.Mkdir(filePath, os.ModeDir)
+func (s Status) Write(path string) error {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, os.ModeDir)
 	}
 
-	configDirPath := jilepath.Join(".", model.ConfigDir, json.ID)
-
-	statusPath = filePath.Join(filePath, "status.json")
-	statusJson, _ := json.Marshall(s)
+	statusPath := filepath.Join(path, "status.json")
+	statusJson, _ := json.Marshal(s)
 	f, err := os.Create(statusPath)
 	defer f.Close()
 	if err != nil {
 		return err
 	}
-	_, err = f.WriteString(statusJson)
+	_, err = f.WriteString(string(statusJson))
 	if err != nil {
 		return err
 	}

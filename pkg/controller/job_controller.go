@@ -1,11 +1,11 @@
 package controller
 
 import (
-	"net/http"
-	"github.com/TsuyoshiUshio/volley/pkg/provider"
 	"github.com/TsuyoshiUshio/volley/pkg/model"
+	"github.com/TsuyoshiUshio/volley/pkg/provider"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"net/http"
 )
 
 func Start(c *gin.Context) {
@@ -29,10 +29,28 @@ func Start(c *gin.Context) {
 	}()
 
 	c.JSON(http.StatusCreated, gin.H{
-		"job_id": job_id.String(),
+		"job_id":    job_id.String(),
 		"config_id": config.ID,
 	})
 
 	return
 
+}
+
+func StatusCheck(c *gin.Context) {
+
+	jobID := c.Param("job_id")
+	if jobID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Can not file job_id as a parameter. /job/:job_id required."})
+		return
+	}
+	p := provider.NewAzureProvider()
+	statusCheckContext := provider.NewStatusCheckContext(jobID)
+	status, err := p.StatusCheck(statusCheckContext)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, status)
 }

@@ -16,12 +16,16 @@ const (
 	StatusFailed    = "failed"
 )
 
+const(
+	StatusFileName = "status.json"
+)
+
 func (s Status) Write(path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.Mkdir(path, os.ModeDir)
 	}
 
-	statusPath := filepath.Join(path, "status.json")
+	statusPath := filepath.Join(path, StatusFileName)
 	statusJson, _ := json.Marshal(s)
 	f, err := os.Create(statusPath)
 	defer f.Close()

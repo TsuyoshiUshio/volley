@@ -1,14 +1,16 @@
 package provider
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/TsuyoshiUshio/volley/pkg/model"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
+
+	"github.com/TsuyoshiUshio/volley/pkg/model"
 )
 
 type Provider interface {
@@ -22,8 +24,18 @@ type RunContext struct {
 	JmxFileName string
 }
 
+type StatusCheckContext struct {
+	JobID string
+}
+
 func NewAzureProvider() *AzureProvider {
 	return &AzureProvider{}
+}
+
+func NewStatusCheckContext(jobID string) *StatusCheckContext {
+	return &StatusCheckContext{
+		JobID: jobID,
+	}
 }
 
 func NewRunContext(configID string, jobID string) *RunContext {
@@ -31,6 +43,19 @@ func NewRunContext(configID string, jobID string) *RunContext {
 		ConfigID: configID,
 		JobID:    jobID,
 	}
+}
+func (p *AzureProvider) StatusCheck(context *StatusCheckContext) (*model.Status, error) {
+	statusFilePath := filepath.Join(".", model.JobDir, context.JobID, model.StatusFileName)
+	statusFile, err := ioutil.ReadFile(statusFilePath)
+	if err != nil {
+		return nil, err
+	}
+	var status model.Status
+	err = json.Unmarshal(statusFile, &status)
+	if err != nil {
+		return nil, err
+	}
+	return &status, nil
 }
 
 func (p *AzureProvider) Run(context *RunContext) error {

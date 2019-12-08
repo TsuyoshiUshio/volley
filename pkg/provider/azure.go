@@ -2,13 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"github.com/TsuyoshiUshio/volley/pkg/model"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
-
-	"github.com/TsuyoshiUshio/volley/pkg/model"
+	"runtime"
 )
 
 type Provider interface {
@@ -34,9 +34,11 @@ func NewRunContext(configID string, jobID string) *RunContext {
 }
 
 func (p *AzureProvider) Run(context *RunContext) error {
+	dir, _ := os.Getwd()
+	fmt.Println(dir)
 	jobPath := filepath.Join(".", model.JobDir, context.JobID)
 	if _, err := os.Stat(jobPath); os.IsNotExist(err) {
-		os.Mkdir(jobPath, os.ModeDir)
+		err = os.MkdirAll(jobPath, os.ModePerm)
 	}
 
 	configDirPath := filepath.Join(".", model.ConfigDir, context.ConfigID)
@@ -45,13 +47,27 @@ func (p *AzureProvider) Run(context *RunContext) error {
 		return err
 	}
 	configFilePath := filepath.Join(configDirPath, configFileName)
-	statusPath := filepath.Join(".", model.JobDir, context.JobID)
 	status := model.Status{
 		Status: model.StatusRunning,
 	}
-	status.Write(statusPath)
+	status.Write(jobPath)
 	// TODO Parameter should be flexible.
-	cmd := exec.Command("jmeter", "-n", "-t", configFilePath, "-l", "stress.log", "-e", "-o", "report")
+	logPath := filepath.Join(jobPath, "stress.log")
+	reportPath := filepath.Join(jobPath, "report")
+
+	var cmd *exec.Cmd
+
+	if runtime.GOOS == "windows" {
+		commandPath, err := exec.LookPath("jmeter.bat")
+		if err != nil {
+			return err
+		}
+		cmd = exec.Command("cmd", "/C", commandPath, "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath)
+
+	} else {
+		cmd = exec.Command("jmeter", "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath)
+	}
+
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -60,13 +76,13 @@ func (p *AzureProvider) Run(context *RunContext) error {
 		status = model.Status{
 			Status: model.StatusFailed,
 		}
-		status.Write(statusPath)
+		status.Write(jobPath)
 		return err
 	}
 	status = model.Status{
 		Status: model.StatusCompleted,
 	}
-	status.Write(statusPath)
+	status.Write(jobPath)
 	return nil
 }
 

@@ -2,3 +2,7 @@ playground
 volley
 __debug_bin
 .vscode
+
+pkg/cmd/job
+pkg/cmd/config
+pkg/cmd/debug

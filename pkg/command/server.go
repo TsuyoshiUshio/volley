@@ -1,19 +1,17 @@
 package command
 
 import (
-	"context"
+	"github.com/TsuyoshiUshio/volley/pkg/controller"
+	"github.com/gin-gonic/gin"
+	"github.com/urfave/cli/v2"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/cli/v2"
 )
 
 type ServerCommand struct {
-
 }
 
 func (s *ServerCommand) Start(c *cli.Context) error {
@@ -23,10 +21,13 @@ func (s *ServerCommand) Start(c *cli.Context) error {
 			"message": "hello server",
 		})
 	})
-	
-	srv := &http.Server {
-		Addr: ":8080",
-		Handler: router, 
+
+	router.POST("/job", controller.Start)
+	router.GET("/job/:job_id", controller.StatusCheck)
+
+	srv := &http.Server{
+		Addr:    ":38080",
+		Handler: router,
 	}
 
 	go func() {

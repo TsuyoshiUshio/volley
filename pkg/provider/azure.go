@@ -40,7 +40,11 @@ func (p *AzureProvider) Run(context *RunContext) error {
 	}
 
 	configDirPath := filepath.Join(".", model.ConfigDir, context.ConfigID)
-	configFilePath := filepath.Join(configDirPath, context.JmxFileName)
+	configFileName, err := findJmxFile(configDirPath)
+	if err != nil {
+		return err
+	}
+	configFilePath := filepath.Join(configDirPath, configFileName)
 	statusPath := filepath.Join(".", model.JobDir, context.JobID)
 	status := model.Status{
 		Status: model.StatusRunning,
@@ -51,7 +55,7 @@ func (p *AzureProvider) Run(context *RunContext) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		status = model.Status{
 			Status: model.StatusFailed,

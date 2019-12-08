@@ -27,7 +27,7 @@ func (s *ServerCommand) Start(c *cli.Context) error {
 	
 	
 	srv := &http.Server {
-		Addr: ":8080",
+		Addr: ":38080",
 		Handler: router, 
 	}
 

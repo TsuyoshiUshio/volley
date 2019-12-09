@@ -22,6 +22,7 @@ func (s *ServerCommand) Start(c *cli.Context) error {
 		})
 	})
 
+	router.POST("/config", controller.CreateNewConfig)
 	router.POST("/job", controller.Start)
 	router.GET("/job/:job_id", controller.StatusCheck)
 	router.GET("/asset/:job_id", controller.Download)

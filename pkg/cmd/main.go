@@ -1,39 +1,126 @@
 package main
 
 import (
-	"os"
+	"github.com/TsuyoshiUshio/volley/pkg/command"
 	"github.com/urfave/cli/v2"
 	"log"
-	"github.com/TsuyoshiUshio/volley/pkg/command"
+	"os"
 )
 
 func main() {
 	app := &cli.App{
-		Name: "volley", 
-		Usage: "Manage JMeter cluster",
+		Name:    "volley",
+		Usage:   "Load Testing Tool with JMeter",
 		Version: "0.0.1",
-		Commands: []*cli.Command {
+		Commands: []*cli.Command{
 			{
-				Name: "provision",
+				Name:    "provision",
 				Aliases: []string{"p"},
-				Usage: "Provision JMeter cluster",
-				Action: (&command.ProvisionCommand{}).Provision,
+				Usage:   "Provision JMeter cluster",
+				Action:  (&command.ProvisionCommand{}).Provision,
 				Flags: []cli.Flag{
-					&cli.IntFlag {
-						Name: "slave",
+					&cli.IntFlag{
+						Name:    "slave",
 						Aliases: []string{"s"},
-						Value: 1,
-						Usage: "Specify the number of slaves of JMeter cluster",
+						Value:   1,
+						Usage:   "Specify the number of slaves of JMeter cluster",
 					},
-				}, 
+				},
 			},
 			{
-				Name: "server",
+				Name:    "server",
 				Aliases: []string{"s"},
-				Usage: "API Server for uploading/receiving files",
-				Action: (&command.ServerCommand{}).Start,
+				Usage:   "API Server for uploading/receiving files",
+				Action:  (&command.ServerCommand{}).Start,
 			},
-		},		
+			{
+				Name:    "run",
+				Aliases: []string{"r"},
+				Usage:   "Run JMeter",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "config-id",
+						Aliases: []string{"c"},
+						Usage:   "Specify config-id that is created by config command.",
+					},
+					&cli.StringFlag{
+						Name:    "master",
+						Aliases: []string{"m"},
+						Usage:   "Specify master ip address or domain name.",
+					},
+					&cli.StringFlag{
+						Name:    "port",
+						Aliases: []string{"p"},
+						Usage:   "Specify master port. 38080 by default",
+					},
+				},
+			}, {
+				Name:    "config",
+				Aliases: []string{"c"},
+				Usage:   "Upload jmx, csv files to the server. Return value is config-id.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "directory",
+						Aliases: []string{"d"},
+						Usage:   "Specify directory that contains jmx and csv files that you want to upload",
+					},
+					&cli.StringFlag{
+						Name:    "master",
+						Aliases: []string{"m"},
+						Usage:   "Specify master ip address or domain name.",
+					},
+					&cli.StringFlag{
+						Name:    "port",
+						Aliases: []string{"p"},
+						Usage:   "Specify master port. 38080 by default",
+					},
+				},
+			},
+			{
+				Name:    "log",
+				Aliases: []string{"l"},
+				Usage:   "fetch log of the JMeter run.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "job-id",
+						Aliases: []string{"j"},
+						Usage:   "Specify job-id that run sub command returns.",
+					},
+					&cli.StringFlag{
+						Name:    "master",
+						Aliases: []string{"m"},
+						Usage:   "Specify master ip address or domain name.",
+					},
+					&cli.StringFlag{
+						Name:    "port",
+						Aliases: []string{"p"},
+						Usage:   "Specify master port. 38080 by default",
+					},
+				},
+			},
+			{
+				Name:    "destroy",
+				Aliases: []string{"d"},
+				Usage:   "fetch log of the JMeter run.",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "job-id",
+						Aliases: []string{"j"},
+						Usage:   "Specify job-id that run sub command returns.",
+					},
+					&cli.StringFlag{
+						Name:    "master",
+						Aliases: []string{"m"},
+						Usage:   "Specify master ip address or domain name.",
+					},
+					&cli.StringFlag{
+						Name:    "port",
+						Aliases: []string{"p"},
+						Usage:   "Specify master port. 38080 by default",
+					},
+				},
+			},
+		},
 	}
 
 	err := app.Run(os.Args)

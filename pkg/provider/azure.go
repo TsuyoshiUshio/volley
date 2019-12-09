@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"runtime"
 
+	"github.com/TsuyoshiUshio/volley/pkg/helper"
 	"github.com/TsuyoshiUshio/volley/pkg/model"
 )
 
@@ -109,6 +110,18 @@ func (p *AzureProvider) Run(context *RunContext) error {
 	}
 	status.Write(jobPath)
 	return nil
+}
+
+func (p *AzureProvider) CreateAsset(jobID string) ([]byte, error) {
+	dir, err := ioutil.TempDir("", "volley")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(dir)
+	sourcePath := filepath.Join(".", model.JobDir, jobID)
+	zipFilePath := filepath.Join(dir, jobID+".zip")
+	helper.Zip(sourcePath, zipFilePath)
+	return ioutil.ReadFile(zipFilePath)
 }
 
 func findJmxFile(directory string) (string, error) {

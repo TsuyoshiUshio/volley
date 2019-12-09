@@ -37,6 +37,7 @@ func main() {
 				Name:    "run",
 				Aliases: []string{"r"},
 				Usage:   "Run JMeter",
+				Action:  (&command.RunCommand{}).Run,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "config-id",
@@ -51,6 +52,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "port",
 						Aliases: []string{"p"},
+						Value:   "38080",
 						Usage:   "Specify master port. 38080 by default",
 					},
 				},
@@ -72,6 +74,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "port",
 						Aliases: []string{"p"},
+						Value:   "38080",
 						Usage:   "Specify master port. 38080 by default",
 					},
 				},
@@ -80,6 +83,7 @@ func main() {
 				Name:    "log",
 				Aliases: []string{"l"},
 				Usage:   "fetch log of the JMeter run.",
+				Action:  (&command.LogCommand{}).Download,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "job-id",
@@ -94,6 +98,7 @@ func main() {
 					&cli.StringFlag{
 						Name:    "port",
 						Aliases: []string{"p"},
+						Value:   "38080",
 						Usage:   "Specify master port. 38080 by default",
 					},
 				},

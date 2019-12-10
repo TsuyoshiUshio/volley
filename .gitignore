@@ -6,3 +6,6 @@ __debug_bin
 pkg/cmd/job
 pkg/cmd/config
 pkg/cmd/debug
+
+output
+jmeter.log

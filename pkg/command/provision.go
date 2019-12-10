@@ -1,14 +1,16 @@
 package command
 
 import (
-	"github.com/urfave/cli/v2"
 	"fmt"
+	"github.com/urfave/cli/v2"
+	"time"
 )
 
-type ProvisionCommand struct {	
+type ProvisionCommand struct {
 }
 
 func (s *ProvisionCommand) Provision(c *cli.Context) error {
-	fmt.Println("Provisioning JMeter Environment Master: 1, Slave:", c.Int("slave"))
+	fmt.Printf("Provisioning JMeter Cluster. Name: %s Master: 1, Slave: %d ...", c.String("cluster-name"), c.Int("slave"))
+	time.Sleep(5 * time.Second)
 	return nil
 }

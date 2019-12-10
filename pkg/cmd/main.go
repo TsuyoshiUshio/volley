@@ -60,6 +60,7 @@ func main() {
 				Name:    "config",
 				Aliases: []string{"c"},
 				Usage:   "Upload jmx, csv files to the server. Return value is config-id.",
+				Action:  (&command.ConfigCommand{}).Upload,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:    "directory",

@@ -14,7 +14,7 @@ import (
 func CreateNewConfig(c *gin.Context) {
 	// Receive multiple files
 	form, _ := c.MultipartForm()
-	files := form.File["upload[]"]
+	files := form.File["file"]
 	configID, err := uuid.NewUUID()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

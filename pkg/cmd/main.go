@@ -19,6 +19,11 @@ func main() {
 				Usage:   "Provision JMeter cluster",
 				Action:  (&command.ProvisionCommand{}).Provision,
 				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "cluster-name",
+						Aliases: []string{"c"},
+						Usage:   "Specify Cluster Name. Should be uniq.",
+					},
 					&cli.IntFlag{
 						Name:    "slave",
 						Aliases: []string{"s"},
@@ -107,22 +112,12 @@ func main() {
 			{
 				Name:    "destroy",
 				Aliases: []string{"d"},
-				Usage:   "fetch log of the JMeter run.",
+				Usage:   "Destroy the JMeter Cluster",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "job-id",
-						Aliases: []string{"j"},
-						Usage:   "Specify job-id that run sub command returns.",
-					},
-					&cli.StringFlag{
-						Name:    "master",
-						Aliases: []string{"m"},
-						Usage:   "Specify master ip address or domain name.",
-					},
-					&cli.StringFlag{
-						Name:    "port",
-						Aliases: []string{"p"},
-						Usage:   "Specify master port. 38080 by default",
+						Name:    "cluster-name",
+						Aliases: []string{"c"},
+						Usage:   "Specify Cluster Name. Should be uniq.",
 					},
 				},
 			},

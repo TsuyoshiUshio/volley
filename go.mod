@@ -3,6 +3,7 @@ module github.com/TsuyoshiUshio/volley
 go 1.13
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
 	github.com/gin-gonic/gin v1.5.0
 	github.com/google/uuid v1.1.1

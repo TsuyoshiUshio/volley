@@ -20,12 +20,12 @@ func TestZipScenario(t *testing.T) {
 	}
 
 	os.MkdirAll(tempPath, os.ModePerm)
-	zipFilePath := filepath.Join(tempPath, "circuit.zip")
-	Zip(filepath.Join("..", "samples", "hello-world", "circuit"), zipFilePath)
+	zipFilePath := filepath.Join(tempPath, "hello.zip")
+	Zip(filepath.Join("test-data", "zip", "hello"), zipFilePath)
 	UnZip(zipFilePath, tempPath)
-	manifestPath := filepath.Join(tempPath, "circuit", "manifest.yaml")
-	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
-		assert.Fail(t, "Unzipped file  manifest can not found at :"+manifestPath)
+	textPath := filepath.Join(tempPath, "hello", "world.txt")
+	if _, err := os.Stat(textPath); os.IsNotExist(err) {
+		assert.Fail(t, "Unzipped file  manifest can not found at :"+textPath)
 	}
 
 	// clean up

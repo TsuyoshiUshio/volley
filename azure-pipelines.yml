@@ -31,6 +31,7 @@ steps:
       which go
       go get -u github.com/jstemmer/go-junit-report
       go test -v ./... 2>&1 | $GOPATH/bin/go-junit-report > report.xml
+      cat report.xml
 
 - task: PublishTestResults@2
   displayName: "Publish Test Report"

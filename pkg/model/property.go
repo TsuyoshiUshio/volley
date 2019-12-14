@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	JMeterPropertyFile = "jmeter.properties"
+)
+
 type JMeterProperty struct {
 	RemoteHostIPs []string `json:"remote_host_ips" binding:"required"`
 }

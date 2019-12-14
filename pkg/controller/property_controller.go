@@ -2,7 +2,9 @@ package controller
 
 import (
 	"net/http"
+	"os"
 
+	"github.com/TsuyoshiUshio/volley/pkg/helper"
 	"github.com/TsuyoshiUshio/volley/pkg/model"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +15,20 @@ func UpdateJMeterConfig(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	// Implement the method that enable up to update the JMeter Property File
-	// Getting Source from helper file. It gets the jmeter property file path.
-	// Then call property.
+
+	if _, err := os.Stat(model.JMeterPropertyFile); err == nil {
+		err = os.Remove(model.JMeterPropertyFile)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+	}
+
+	err := jMeterProperty.GenerateModifiedProperty(helper.GetJMeterPropertyFilePath(), model.JMeterPropertyFile)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, jMeterProperty)
+	return
 }

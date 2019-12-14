@@ -174,4 +174,39 @@ We are planning these feature as TODO.
 
 ## Developing Volley
 
-TODO
+### Build Project
+
+_linux and mac_
+
+```bash
+./script/build.sh
+```
+
+_windows_
+
+```cmd
+script\build.bat
+```
+
+### Build For All Platform
+
+If you need to build multi platform build, execute this command. 
+Currently only support bash. It works on linux, mac, and windows(git bash)
+
+```bash
+./script/build_all_platform.sh
+```
+
+### Run Unit Test
+
+_linux and mac_
+
+```bash
+./script/test.sh
+```
+
+_windows_
+
+```cmd
+script\test.bat
+```

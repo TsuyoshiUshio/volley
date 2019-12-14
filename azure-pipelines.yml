@@ -32,9 +32,11 @@ steps:
       go get -u github.com/jstemmer/go-junit-report
       pwd
       ls -l
+      cd pkg
       go test -v ./...
       go test -v ./... 2>&1 | $GOPATH/bin/go-junit-report > report.xml
       cat report.xml
+      cd ..
 
 - task: PublishTestResults@2
   displayName: "Publish Test Report"

@@ -60,6 +60,7 @@ OPTIONS:
 
 * **Upload config**: `POST  /config`: Upload JMeter Config files. It create a new UUID and create a folder `config/${UUID}` then put the files under the directory.  `parameter`: none `body`: multipart files. `return`: {"id":"${config_id}"}
 * **Run JMeter Job**: `POST  /job` : Start Job that JMeter execution using config_id. It doesn't wait whole execution. It generate job_id start JMeter with the log under `job/${UUID}` directory.  `parameter`: none `body`: {"id":"${config_id}"} `return`:  {"job_id": "${job_id}", "config_id":"${config_id}"}
+* **Update JMeter Property**: `POST /property` : Upload Remote IP hosts (slave) then it will update the default `jmeter.properties` file with the uploaded ip. You can find the modified `jmeter.property` file at the current directory of the `volley server`.  `parameter`: none `body`: {"remote_host_ips": ["${ip_address_1}", "${ip_address_2"}]} `return` : The same structure as the request body.
 * **Check Job Status**: `GET /job/:job_id`: Get the status of a job. status will be found `job/job_id/status.json`. This api return the status. Possible value is `Running`, `Completed`, and `Failed`. `return`: {"status": "${status}"}.
 * **Download Report**: `GET /asset/:job_id`: Download the result of the job execution. It downloads as a zip file. the fileName will be `${job_id}.zip`
 
@@ -70,12 +71,13 @@ $ volley server
 [GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
 
 [GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
- - using env:   export GIN_MODE=release
- - using code:  gin.SetMode(gin.ReleaseMode)
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
 
 [GIN-debug] GET    /                         --> github.com/TsuyoshiUshio/volley/pkg/command.(*ServerCommand).Start.func1 (3 handlers)
 [GIN-debug] POST   /config                   --> github.com/TsuyoshiUshio/volley/pkg/controller.CreateNewConfig (3 handlers)
 [GIN-debug] POST   /job                      --> github.com/TsuyoshiUshio/volley/pkg/controller.Start (3 handlers)
+[GIN-debug] POST   /property                 --> github.com/TsuyoshiUshio/volley/pkg/controller.UpdateJMeterConfig (3 handlers)
 [GIN-debug] GET    /job/:job_id              --> github.com/TsuyoshiUshio/volley/pkg/controller.StatusCheck (3 handlers)
 [GIN-debug] GET    /asset/:job_id            --> github.com/TsuyoshiUshio/volley/pkg/controller.Download (3 handlers)
 ```

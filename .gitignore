@@ -9,3 +9,4 @@ pkg/cmd/debug
 
 output
 jmeter.log
+pkg/cmd/jmeter.properties

@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"github.com/TsuyoshiUshio/volley/pkg/model"
 	"log"
 	"os/exec"
 	"path/filepath"
@@ -12,5 +13,5 @@ func GetJMeterPropertyFilePath() string {
 		log.Fatal("Can not find jmeter executable on the path enviornment variables.", err)
 	}
 	jmeterBinDir := filepath.Dir(jmeterPath)
-	return jmeterBinDir
+	return filepath.Join(jmeterBinDir, model.JMeterPropertyFile)
 }

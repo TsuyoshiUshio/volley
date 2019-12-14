@@ -1,4 +1,6 @@
 # Volley
+[![Build Status](https://dev.azure.com/csedevops/volley/_apis/build/status/TsuyoshiUshio.volley?branchName=master)](https://dev.azure.com/csedevops/volley/_build/latest?definitionId=228&branchName=master)
+
 Volley is a command line tool for create/destroy Stress testing environment and help you to run the senario and getting a log with a command line. 
 
 The key feature of Volley are: 

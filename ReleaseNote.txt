@@ -1,0 +1,8 @@
+# Release 0.0.2 
+
+This release is include test binary with some new API. 
+
+* Update JMeter Property API
+* Enabling CI/CD
+
+

@@ -1,0 +1,26 @@
+# Go
+# Build your Go project.
+# Add steps that test, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/go
+
+trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: GoTool@0
+  inputs:
+    version: '1.13.5'
+
+- task: CmdLine@2
+  inputs:
+    script: |
+      which go
+      ls -l
+- task: Go@0
+  inputs:
+    command: 'build'
+    arguments: 'pkg/cmd/main.go'
+

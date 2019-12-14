@@ -49,8 +49,10 @@ steps:
   inputs:
     script: |
       /bin/bash ./script/build_platform_ci.sh
-      cp **/*.tgz $(Build.ArtifactStagingDirectory)
-      cp **/*.zip $(Build.ArtifactStagingDirectory)
+      mkdir $(Build.ArtifactStagingDirectory)/artifacts
+      cp **/*.tgz $(Build.ArtifactStagingDirectory)/artifacts
+      cp **/*.zip $(Build.ArtifactStagingDirectory)/artifacts
+      cp ReleaseNote.txt $(Build.ArtifactStagingDirectory)
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'

@@ -121,6 +121,7 @@ echo "# JMeter setup" >> /home/azureuser/.bashrc
 echo "export JAVA_HOME=${JAVA_HOME}" >> /home/azureuser/.bashrc
 echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> /home/azureuser/.bashrc
 
+cd /home/azureuser
 # install volley
 GET_VOLLEY=get_volley.sh
 curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/get_volley.sh -o $GET_VOLLEY

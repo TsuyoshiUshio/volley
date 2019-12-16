@@ -25,7 +25,7 @@
         },
         "ubuntuOSVersion": {
             "type": "string",
-            "defaultValue": "16.04-DAILY-LTS",
+            "defaultValue": "18.04-LTSS",
             "metadata": {
                 "description": "The Ubuntu version for deploying the Docker containers. This will pick a fully patched image of this given Ubuntu version."
             },

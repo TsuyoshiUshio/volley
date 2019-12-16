@@ -127,7 +127,7 @@ curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startup
 chmod +x $GET_VOLLEY
 chown azureuser $GET_VOLLEY
 chgrp azureuser $GET_VOLLEY
-sudo -u azureuser get_volley.sh
+sudo -u azureuser ./get_volley.sh
 
 VOLLEY_START_SCRIPT=/home/azureuser/start_volley.sh
 curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/start_volley.sh -o $VOLLEY_START_SCRIPT

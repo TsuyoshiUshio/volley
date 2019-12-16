@@ -122,8 +122,12 @@ echo "export JAVA_HOME=${JAVA_HOME}" >> /home/azureuser/.bashrc
 echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> /home/azureuser/.bashrc
 
 # install volley
-curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/get_volley.sh -o get_volley.sh
-sudo -u azureuser /bin/bash get_volley.sh
+GET_VOLLEY=get_volley.sh
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/get_volley.sh -o $GET_VOLLEY
+chmod +x $GET_VOLLEY
+chown azureuser $GET_VOLLEY
+chgrp azureuser $GET_VOLLEY
+sudo -u azureuser get_volley.sh
 
 VOLLEY_START_SCRIPT=/home/azureuser/start_volley.sh
 curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/start_volley.sh -o $VOLLEY_START_SCRIPT

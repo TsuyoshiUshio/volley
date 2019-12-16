@@ -121,6 +121,33 @@ echo "# JMeter setup" >> /home/azureuser/.bashrc
 echo "export JAVA_HOME=${JAVA_HOME}" >> /home/azureuser/.bashrc
 echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> /home/azureuser/.bashrc
 
+# install volley
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/get_volley.sh -o get_volley.sh
+sudo -u azureuser /bin/bash get_volley.sh
+
+VOLLEY_START_SCRIPT=/home/azureuser/start_volley.sh
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/start_volley.sh -o $VOLLEY_START_SCRIPT
+chmod +x $VOLLEY_START_SCRIPT
+chown azureuser $VOLLEY_START_SCRIPT
+chgrp azureuser $VOLLEY_START_SCRIPT
+# Master: 
+# Start volley server
+# Add cron for enabling start volley server when it starts
+
+sudo -u azureuser $VOLLEY_START_SCRIPT
+echo "@reboot ${VOLLEY_START_SCRIPT}" | crontab -u azureuser -
+
+# Slave:
+# Start JMeter server
+# Add cron for enabing start JMeter as server when it starts
+# JMETER_SLAVE_START_SCRIPT=/home/azureuser/start_jmeter_slave.sh
+# curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/update/startupscript/script/start_jmeter_slave.sh -o $JMETER_SLAVE_START_SCRIPT
+# chmod +x $JMETER_SLAVE_START_SCRIPT
+# chown azureuser $JMETER_SLAVE_START_SCRIPT
+# chgrp azureuser $JMETER_SLAVE_START_SCRIPT
+# echo "@reboot ${JMETER_SLAVE_START_SCRIPT}" | crontab -u azureuser -
+
+
 # /bin/bash -c 'docker run -d --name docker-daemon --privileged docker:stable-dind &'
 # /bin/bash -c 'docker run -v /home/nginx/config:/home/nginx/config -v /home/nginx/contents:/home/nginx/contents -v /home/azureuser/logs:/home/azureuser/logs -v /var/run/docker.sock:/var/run/docker.sock -d -e  AZUREUSERNAME -e AZUREPASSWORD -e SUBID -e LOCATION -e TEAMNAME -e RECIPIENTEMAIL -e CHATCONNECTIONSTRING -e CHATMESSAGEQUEUE -e TENANTID -e APPID -e GITBRANCH devopsoh/proctor-container &'
 #echo "############### End of custom script ###############"

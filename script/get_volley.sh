@@ -4,9 +4,9 @@
 # Execute this script with user that sudo is available
 
 # Download volley binary
-# https://github.com/TsuyoshiUshio/volley/releases/download/0.0.2/volley-linux-amd64.tgz
+# https://github.com/TsuyoshiUshio/volley/releases/download/0.0.3/volley-linux-amd64.tgz
 
-VERSION="0.0.2"
+VERSION="0.0.3"
 BINARY_TYPE=""
 ARCHIVE=""
 BINARY=""

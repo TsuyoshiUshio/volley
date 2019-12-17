@@ -75,3 +75,15 @@ func TestSuccessCriteria_Validate_ExceedErrorRatio(t *testing.T) {
 	}
 	assert.False(t, isSuccess)
 }
+
+func TestSuccessCriteria_Instanciate(t *testing.T) {
+	configFilePath := filepath.Join("test-data", "success-criteria", "config", "success_criteria.json")
+	criteria, err := NewAverageTimeAndErrorOnRPSSuccessCriteria(configFilePath)
+	if err != nil {
+		panic(err)
+	}
+	assert.Equal(t, "average_time_error_on_rps", criteria.Name)
+	assert.Equal(t, int64(10000), criteria.Parameters[AVERAGE_LATENCY])
+	assert.Equal(t, int64(10), criteria.Parameters[ERROR_RATIO])
+	assert.Equal(t, int64(250), criteria.Parameters[REQUEST_PER_SECOND])
+}

@@ -1,0 +1,8 @@
+{
+    "criteria":"average_time_error_on_rps",
+    "Parameters":{
+        "avg_latency":10000,
+        "error_ratio":10,
+        "rps":250
+    }
+}

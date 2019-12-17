@@ -2,7 +2,9 @@ package model
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -10,24 +12,46 @@ import (
 )
 
 const (
+	// REQUEST_PER_SECOND is Request per second
 	REQUEST_PER_SECOND = "rps"
-	AVERAGE_LATENCY    = "avg_latency"
-	ERROR_RATIO        = "error_ratio"
+	// AVERAGE_LATENCY is Average Latency
+	AVERAGE_LATENCY = "avg_latency"
+	// ERROR_RATIO is Error ratio
+	ERROR_RATIO = "error_ratio"
 )
 
+// ISuccessCriteria is an interface for SuccessCriteria
 type ISuccessCriteria interface {
 	Validate(fileName string) (bool, error)
 }
 
+// SuccessCriteria is a struct that represents Scucess Criteria config
 type SuccessCriteria struct {
 	Name       string `json:"criteria" binding:"required"`
 	Parameters map[string]int64
 }
 
+// NewAverageTimeAndErrorOnRPSSuccessCriteria constructs AverageTimeAndErrorOnRPSSuccessCriteria instance from config file path
+func NewAverageTimeAndErrorOnRPSSuccessCriteria(configFilePath string) (*AverageTimeAndErrorOnRPSSuccessCriteria, error) {
+	config, err := ioutil.ReadFile(configFilePath)
+	if err != nil {
+		return nil, err
+	}
+	var criteria AverageTimeAndErrorOnRPSSuccessCriteria
+	err = json.Unmarshal(config, &criteria)
+	if err != nil {
+		return nil, fmt.Errorf("Can not parse sucess criteria config fileName: %s, contents: %s, error:%v", configFilePath, string(config), err)
+	}
+	return &criteria, nil
+}
+
+// AverageTimeAndErrorOnRPSSuccessCriteria is a success criteria of Stress Testing.
+// This criteria represents, validate the test result with Averate Latency and Error ratio and up to the target Request per second
 type AverageTimeAndErrorOnRPSSuccessCriteria struct {
 	SuccessCriteria
 }
 
+// Validate if the Stress testing is success or not with boolean.
 func (c *AverageTimeAndErrorOnRPSSuccessCriteria) Validate(fileName string) (bool, error) {
 	// Prepare the parser
 	parser := &JMeterLog{}

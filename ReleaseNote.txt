@@ -1,8 +1,11 @@
-# Release 0.0.2 
+# Release 0.0.3 
 
-This release is include test binary with some new API. 
+This release is include 
 
-* Update JMeter Property API
-* Enabling CI/CD
+* Create ARM template for deploying JMeter Cluster
+* Update the startup script 
+* get-volley.sh script for enabling easy to install volley
+* Build Breaker
+* Wait option with timeout on run sub command
 
 

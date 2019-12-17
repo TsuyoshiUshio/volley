@@ -124,6 +124,8 @@ OPTIONS:
    --config-id value, -c value  Specify config-id that is created by config command.
    --master value, -m value     Specify master ip address or domain name.
    --port value, -p value       Specify master port. 38080 by default (default: "38080")
+   --wait, -w                   Make this subcommand wait for completion (default: false)
+   --timeout value, -t value    Specify the default timeout in minutes if you use --wait (-w) flag (default: 30)
    --help, -h                   show help (default: false)
 ```
 
@@ -199,11 +201,27 @@ The log file's result is
 > 2019/12/17 00:29:11 TotalRequest: 3916, Average Latency: 11593, ErrorRatio: 1 % Upto 250 Request Per Second.
 
 
+This sample fails 
+
 ```bash
 $ volley breaker -l pkg/model/test-data/success-criteria/avg-time-error-on-rps/stress.log -c pkg/model/test-data/success-criteria/config/success_criteria.json
 2019/12/17 02:26:25 TotalRequest: 3916, Average Latency: 11593, ErrorRatio: 1 %
 2019/12/17 02:26:25 Request Per Second Up to: 250, Target Average Letency Less than: 10000, Target Error Ratio Less than: 10
 2019/12/17 02:26:25 Validation failed.
+$ echo $?
+1
+```
+If you change the `succss_criteria.json`'s avarage latency from 10000 to 20000, it will success. 
+
+```bash
+$ ./volley breaker -l pkg/model/test-data/success-criteria/avg-time-error-on-rps/stress.log -c pkg/model/test-data/success-criteria/config/success_c
+riteria.json
+2019/12/17 02:40:57 TotalRequest: 3916, Average Latency: 11593, ErrorRatio: 1 %
+2019/12/17 02:40:57 Request Per Second Up to: 250, Target Average Letency Less than: 20000, Target Error Ratio Less than: 10
+2019/12/17 02:40:57 Validation succeed.
+
+$ echo $?
+0
 ```
 
 ### Destroy (TODO)

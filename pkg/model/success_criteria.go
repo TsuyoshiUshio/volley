@@ -52,6 +52,7 @@ type AverageTimeAndErrorOnRPSSuccessCriteria struct {
 }
 
 // Validate if the Stress testing is success or not with boolean.
+// fileName is for a log file for running Stress testing on JMeter.
 func (c *AverageTimeAndErrorOnRPSSuccessCriteria) Validate(fileName string) (bool, error) {
 	// Prepare the parser
 	parser := &JMeterLog{}

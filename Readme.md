@@ -160,6 +160,52 @@ $ ls
 report  status.json  stress.log
 ```
 
+### Breaker
+
+Break the build once if the result of the job execution doesn't meet the success criteria. 
+This sub command resturn exit status 1 if it fails. 
+
+```bash
+NAME:
+   volley breaker - Build
+
+USAGE:
+   volley breaker [command options] [arguments...]
+
+OPTIONS:
+   --log-file value, -l value  File path for JMeter execution log file.
+   --config value, -c value    Config file path of success_criteria (default: "success_criteria.json")
+   --help, -h                  show help (default: false)
+```
+
+#### sample
+
+_success_criteria.json_
+
+```
+{
+    "criteria":"average_time_error_on_rps",
+    "Parameters":{
+        "avg_latency":10000,
+        "error_ratio":10,
+        "rps":250
+    }
+}
+```
+
+Execute the volley using sample log file and success_criteria.json.
+The log file's result is 
+
+> 2019/12/17 00:29:11 TotalRequest: 3916, Average Latency: 11593, ErrorRatio: 1 % Upto 250 Request Per Second.
+
+
+```bash
+$ volley breaker -l pkg/model/test-data/success-criteria/avg-time-error-on-rps/stress.log -c pkg/model/test-data/success-criteria/config/success_criteria.json
+2019/12/17 02:26:25 TotalRequest: 3916, Average Latency: 11593, ErrorRatio: 1 %
+2019/12/17 02:26:25 Request Per Second Up to: 250, Target Average Letency Less than: 10000, Target Error Ratio Less than: 10
+2019/12/17 02:26:25 Validation failed.
+```
+
 ### Destroy (TODO)
 
 ### HELP

@@ -124,6 +124,8 @@ OPTIONS:
    --config-id value, -c value  Specify config-id that is created by config command.
    --master value, -m value     Specify master ip address or domain name.
    --port value, -p value       Specify master port. 38080 by default (default: "38080")
+   --wait, -w                   Make this subcommand wait for completion (default: false)
+   --timeout value, -t value    Specify the default timeout in minutes if you use --wait (-w) flag (default: 30)
    --help, -h                   show help (default: false)
 ```
 

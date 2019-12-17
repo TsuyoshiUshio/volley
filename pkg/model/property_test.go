@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -23,12 +24,15 @@ func TestJMeterProperty_GenerateModifiedProperty(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	if runtime.GOOS == "windows" {
+		source = strings.NewReplacer("\r\n", "\n").Replace(source)
+	}
 	destination, err := readFile(destinationPath)
 	if err != nil {
 		panic(err)
 	}
-
-	assert.Equal(t, "-remote_hosts=127.0.0.1\n+remote_hosts=10.0.0.1,10.0.0.2\n", diffOnly(source, destination))
+	result := diffOnly(source, destination)
+	assert.Equal(t, "-remote_hosts=127.0.0.1\n+remote_hosts=10.0.0.1,10.0.0.2\n", result)
 
 	err = os.Remove(destinationPath)
 	if err != nil {

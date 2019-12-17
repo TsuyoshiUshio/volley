@@ -110,6 +110,25 @@ func main() {
 				},
 			},
 			{
+				Name:    "breaker",
+				Aliases: []string{"b"},
+				Usage:   "Build ",
+				Action:  (&command.BreakerCommand{}).Validate,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:    "log-file",
+						Aliases: []string{"l"},
+						Usage:   "File path for JMeter execution log file.",
+					},
+					&cli.StringFlag{
+						Name:    "config",
+						Aliases: []string{"c"},
+						Value:   "success_criteria.json",
+						Usage:   "Config file path of success_criteria",
+					},
+				},
+			},
+			{
 				Name:    "destroy",
 				Aliases: []string{"d"},
 				Usage:   "Destroy the JMeter Cluster",

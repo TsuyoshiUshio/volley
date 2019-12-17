@@ -45,6 +45,15 @@
         "networkSecurityGroups_jmeterNSG_name": {
             "defaultValue": "jmeterNSG",
             "type": "string"
+        },
+        "slaveCount":{
+            "type": "int",
+            "defaultValue": "2",
+            "minValue": 1,
+            "maxValue": 9,
+            "metadata": {
+                "description" : "Will determine the number of slave nodes created. Defaulted to 2 , with a min node count of 1 and max of 9."
+            }
         }
     },
     "variables": {
@@ -221,7 +230,7 @@
             "name": "[concat('JMeterSlaveVMTemplate', copyIndex(2))]",
             "copy": {
                 "name": "VMcopy",
-                "count": 3
+                "count": "[parameters('slaveCount')]"
             },
             "properties": {
                 "mode": "Incremental",

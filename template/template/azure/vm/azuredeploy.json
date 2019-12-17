@@ -1,5 +1,5 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "adminUsername": {
@@ -20,12 +20,12 @@
             "type": "string",
             "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCggG9tI4+rtMouQh+/rrsbPydED69Pffh0uGXrd+Lw+7L1QLblF1Wqkbs3d6YPk5hQM0kM/wPz7e4BYzy3dQCOp7PudI5Pfkwogj9OTF366Vw99JTcoloWSPNHtk1ju9id1J8rAXPKs6yJ9p0JOHkkVo30IP8tfzUdzCsSkDfXojj55w93ZErJQoY3STPXq15l8629Xovk37FNTgy34DitSHzFdoaRlXIs7n4ZL7rlzbBDJao36LwI4GWgTaZXlyLOFAOQtEUtVqF3+3bf2Gj9fHBUiDo8ZG2fyhpdqDKlCTHCL8IkCIey5svvLBW/VLuwTPXNuGd5JDauSGxezNfp oguzp@Oguzs-MBP.guest.corp.microsoft.com",
             "metadata": {
-              "description": "SSH rsa public key file as a string."
+                "description": "SSH rsa public key file as a string."
             }
         },
         "ubuntuOSVersion": {
             "type": "string",
-            "defaultValue": "16.04-DAILY-LTS",
+            "defaultValue": "18.04-LTS",
             "metadata": {
                 "description": "The Ubuntu version for deploying the Docker containers. This will pick a fully patched image of this given Ubuntu version."
             },
@@ -36,11 +36,15 @@
             ]
         },
         "gitBranch": {
-          "type": "string",
-          "defaultValue": "master",
-          "metadata": {
-              "description": "The git branch which will be used to provision a jmeter server from the volley repository."
-          }
+            "type": "string",
+            "defaultValue": "master",
+            "metadata": {
+                "description": "The git branch which will be used to provision a jmeter server from the volley repository."
+            }
+        },
+        "networkSecurityGroups_jmeterNSG_name": {
+            "defaultValue": "jmeterNSG",
+            "type": "string"
         }
     },
     "variables": {
@@ -58,22 +62,14 @@
         "virtualNetworkName": "jmeterVMVNET",
         "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
         "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
-        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",        
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
         "gitBranch": "[parameters('gitBranch')]",
-        "gitUri": "[concat('https://raw.githubusercontent.com/TsuyoshiUshio/volley/',variables('gitBranch'),'/template/template/azure/vm/setup.sh')]"
+        "gitUri": "[concat('https://raw.githubusercontent.com/TsuyoshiUshio/volley/',variables('gitBranch'),'/template/template/azure/vm/setup.sh')]",
+        "gitUriSlave": "[concat('https://raw.githubusercontent.com/TsuyoshiUshio/volley/',variables('gitBranch'),'/template/template/azure/vm/setupslave.sh')]"
     },
     "resources": [
         {
             "apiVersion": "2019-09-01",
-            "type": "Microsoft.Network/publicIPAddresses",
-            "name": "[variables('publicIPAddressName')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
-            }
-        },
-        {
-            "apiVersion": "2017-11-01",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
@@ -94,105 +90,360 @@
             }
         },
         {
-            "apiVersion": "2017-11-01",
-            "type": "Microsoft.Network/networkInterfaces",
-            "name": "[variables('nicName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-            ],
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "name": "[concat('JMeterMasterVMTemplate', copyIndex(1))]",
+            "copy": {
+                "name": "VMcopy",
+                "count": 1
+            },
             "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-                            },
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            }
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "apiVersion": "2017-12-01",
-            "type": "Microsoft.Compute/virtualMachines",
-            "name": "[variables('vmName')]",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-            ],
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('vmSize')]"
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "outer"
                 },
-                "osProfile": {
-                    "computerName": "[variables('vmName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "linuxConfiguration": {
-                        "disablePasswordAuthentication": true,
-                        "ssh": {
-                          "publicKeys": [
-                            {
-                              "path": "[variables('sshKeyPath')]",
-                              "keyData": "[parameters('sshKeyData')]"
-                            }
-                          ]
-                        }
-                      }
-                },
-                "storageProfile": {
-                    "imageReference": {
-                        "publisher": "[variables('imagePublisher')]",
-                        "offer": "[variables('imageOffer')]",
-                        "sku": "[parameters('ubuntuOSVersion')]",
-                        "version": "[variables('skuversion')]"
-                    },
-                    "osDisk": {
-                        "createOption": "FromImage"
-                    }
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters":{},
+                    "variables":{},
+                    "resources": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                            "apiVersion": "2019-09-01",
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "name": "[concat(variables('publicIPAddressName'),copyIndex(1))]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "publicIPAllocationMethod":"[variables('publicIPAddressType')]" 
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-09-01",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "name": "[concat(variables('nicName'), copyIndex(1))]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'), copyIndex(1))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('publicIPAddressName'),copyIndex(1)))]"
+                                            },
+                                            "subnet": {
+                                                "id": "[variables('subnetRef')]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "apiVersion": "2017-12-01",
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "name": "[concat(variables('vmName'), copyIndex(1))]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Network/networkInterfaces/',variables('nicName'),copyIndex(1))]"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "vmSize": "[parameters('vmSize')]"
+                                },
+                                "osProfile": {
+                                    "computerName": "[concat(variables('vmName'), copyIndex(1))]",
+                                    "adminUsername": "[parameters('adminUsername')]",
+                                    "linuxConfiguration": {
+                                        "disablePasswordAuthentication": true,
+                                        "ssh": {
+                                          "publicKeys": [
+                                            {
+                                              "path": "[variables('sshKeyPath')]",
+                                              "keyData": "[parameters('sshKeyData')]"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                },
+                                "storageProfile": {
+                                    "imageReference": {
+                                        "publisher": "[variables('imagePublisher')]",
+                                        "offer": "[variables('imageOffer')]",
+                                        "sku": "[parameters('ubuntuOSVersion')]",
+                                        "version": "[variables('skuversion')]"
+                                    },
+                                    "osDisk": {
+                                        "createOption": "FromImage"
+                                    }
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nicName'), copyIndex(1)))]"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(variables('vmName'),copyIndex(1),'/initialscript')]",
+                            "apiVersion": "2017-12-01",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                  "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmName'), copyIndex(1)))]"
+                
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Extensions",
+                                "type": "CustomScript",
+                                "typeHandlerVersion": "2.0",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "fileUris": [
+                                        "[variables('gitUri')]"
+                                    ],
+                                    "commandToExecute": "sh setup.sh"
+                                }
+                            }
                         }
                     ]
                 }
             }
         },
         {
-            "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('vmName'),'/initialscript')]",
-            "apiVersion": "2017-12-01",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-                  "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
-
-            ],
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-08-01",
+            "name": "[concat('JMeterSlaveVMTemplate', copyIndex(2))]",
+            "copy": {
+                "name": "VMcopy",
+                "count": 3
+            },
             "properties": {
-                "publisher": "Microsoft.Azure.Extensions",
-                "type": "CustomScript",
-                "typeHandlerVersion": "2.0",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                    "fileUris": [
-                        "[variables('gitUri')]"
-                    ],
-                    "commandToExecute": "sh setup.sh"
+                "mode": "Incremental",
+                "expressionEvaluationOptions": {
+                    "scope": "outer"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters":{},
+                    "variables":{},
+                    "resources": [
+                        {
+                            "apiVersion": "2019-09-01",
+                            "type": "Microsoft.Network/publicIPAddresses",
+                            "name": "[concat(variables('publicIPAddressName'),copyIndex(2))]",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "publicIPAllocationMethod":"[variables('publicIPAddressType')]" 
+                            }
+                        },
+                        {
+                            "apiVersion": "2019-09-01",
+                            "type": "Microsoft.Network/networkInterfaces",
+                            "name": "[concat(variables('nicName'), copyIndex(2))]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'), copyIndex(2))]"
+                            ],
+                            "properties": {
+                                "ipConfigurations": [
+                                    {
+                                        "name": "ipconfig1",
+                                        "properties": {
+                                            "privateIPAllocationMethod": "Dynamic",
+                                            "publicIPAddress": {
+                                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('publicIPAddressName'),copyIndex(2)))]"
+                                            },
+                                            "subnet": {
+                                                "id": "[variables('subnetRef')]"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "apiVersion": "2017-12-01",
+                            "type": "Microsoft.Compute/virtualMachines",
+                            "name": "[concat(variables('vmName'), copyIndex(2))]",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                "[concat('Microsoft.Network/networkInterfaces/',variables('nicName'),copyIndex(2))]"
+                            ],
+                            "properties": {
+                                "hardwareProfile": {
+                                    "vmSize": "[parameters('vmSize')]"
+                                },
+                                "osProfile": {
+                                    "computerName": "[concat(variables('vmName'), copyIndex(2))]",
+                                    "adminUsername": "[parameters('adminUsername')]",
+                                    "linuxConfiguration": {
+                                        "disablePasswordAuthentication": true,
+                                        "ssh": {
+                                          "publicKeys": [
+                                            {
+                                              "path": "[variables('sshKeyPath')]",
+                                              "keyData": "[parameters('sshKeyData')]"
+                                            }
+                                          ]
+                                        }
+                                      }
+                                },
+                                "storageProfile": {
+                                    "imageReference": {
+                                        "publisher": "[variables('imagePublisher')]",
+                                        "offer": "[variables('imageOffer')]",
+                                        "sku": "[parameters('ubuntuOSVersion')]",
+                                        "version": "[variables('skuversion')]"
+                                    },
+                                    "osDisk": {
+                                        "createOption": "FromImage"
+                                    }
+                                },
+                                "networkProfile": {
+                                    "networkInterfaces": [
+                                        {
+                                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nicName'), copyIndex(2)))]"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "type": "Microsoft.Compute/virtualMachines/extensions",
+                            "name": "[concat(variables('vmName'),copyIndex(2),'/initialscript')]",
+                            "apiVersion": "2017-12-01",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [
+                                  "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmName'), copyIndex(2)))]"
+                
+                            ],
+                            "properties": {
+                                "publisher": "Microsoft.Azure.Extensions",
+                                "type": "CustomScript",
+                                "typeHandlerVersion": "2.0",
+                                "autoUpgradeMinorVersion": true,
+                                "settings": {
+                                    "fileUris": [
+                                        "[variables('gitUriSlave')]"
+                                    ],
+                                    "commandToExecute": "sh setupslave.sh"
+                                }
+                            }
+                        }
+                    ]
                 }
             }
-        }
-    ],
-    "outputs": {
-        "privateIPAddress": {
-          "type": "string",
-          "value": "[reference(variables('nicName')).ipConfigurations[0].properties.privateIPAddress]"
-        }
-      }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkSecurityGroups_jmeterNSG_name')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Port_38080",
+                        "properties": {
+                            "description": "JMeter Server Access Port",
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "38080",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "SSH_22",
+                        "properties": {
+                            "description": "SSH Access to VMS",
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 110,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_jmeterNSG_name'), '/Port_38080')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
+            ],
+            "properties": {
+                "description": "JMeter Server Access Port",
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "38080",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_jmeterNSG_name'), '/SSH_22')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
+            ],
+            "properties": {
+                "description": "SSH Access to VMS",
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 110,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "apiVersion": "2018-03-01",
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "name": "[concat(variables('virtualNetworkName'), '/', variables('subnetName'))]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+              "addressPrefix": "[variables('addressPrefix')]",
+              "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
+              }
+            }
+          }
+    ]
 }

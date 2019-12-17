@@ -60,6 +60,17 @@ func main() {
 						Value:   "38080",
 						Usage:   "Specify master port. 38080 by default",
 					},
+					&cli.BoolFlag{
+						Name:    "wait",
+						Aliases: []string{"w"},
+						Usage:   "Make this subcommand wait for completion",
+					},
+					&cli.IntFlag{
+						Name:    "timeout",
+						Aliases: []string{"t"},
+						Value:   30,
+						Usage:   "Specify the default timeout in minutes if you use --wait (-w) flag",
+					},
 				},
 			}, {
 				Name:    "config",

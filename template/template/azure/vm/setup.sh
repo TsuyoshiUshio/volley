@@ -139,7 +139,7 @@ chgrp azureuser $VOLLEY_START_SCRIPT
 # Start volley server
 # Add cron for enabling start volley server when it starts
 
-sudo -u azureuser --preserve-env=PATH $VOLLEY_START_SCRIPT
+sudo -u azureuser --preserve-env=PATH,JAVA_HOME $VOLLEY_START_SCRIPT
 echo "@reboot ${VOLLEY_START_SCRIPT}" | crontab -u azureuser -
 
 # Slave:

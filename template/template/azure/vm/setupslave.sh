@@ -124,7 +124,7 @@ echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> /home/azureuser/.bashrc
 cd /home/azureuser
 # install volley
 GET_VOLLEY=get_volley.sh
-curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/master/script/get_volley.sh -o $GET_VOLLEY
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/${GIT_BRANCH}/script/get_volley.sh -o $GET_VOLLEY
 chmod +x $GET_VOLLEY
 chown azureuser $GET_VOLLEY
 chgrp azureuser $GET_VOLLEY

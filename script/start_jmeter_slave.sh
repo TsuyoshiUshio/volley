@@ -6,6 +6,6 @@ JMETER_DIR=$HOME
 mkdir -p $JMETR_DIR
 cd $JMETER_DIR
 # TODO IF the size becomes big, we might need to consider Log rotation
-nohup jmeter-server &> jmeter-server-stdin-out.log 
+nohup jmeter-server &> jmeter-server-stdin-out.log &
 echo "jmeter server started. See the log at $JMETER_DIR/jmeter-server-stdin-out.log and $JMETER_DIR/jmeter.log ."
 

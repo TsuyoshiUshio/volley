@@ -2,7 +2,7 @@
 
 # jmeter should be in the path.
 
-JMETER_DIR=/home/azureuser/jmeter
+JMETER_DIR=$HOME
 mkdir -p $JMETR_DIR
 cd $JMETER_DIR
 # TODO IF the size becomes big, we might need to consider Log rotation

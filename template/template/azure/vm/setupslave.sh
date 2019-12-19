@@ -150,7 +150,7 @@ chgrp azureuser $VOLLEY_START_SCRIPT
  chmod +x $JMETER_SLAVE_START_SCRIPT
  chown azureuser $JMETER_SLAVE_START_SCRIPT
  chgrp azureuser $JMETER_SLAVE_START_SCRIPT
- sudo -u azureuser -E $JMETER_SLAVE_START_SCRIPT
+ sudo -u azureuser --preserve-env=PATH $JMETER_SLAVE_START_SCRIPT
  echo "@reboot ${JMETER_SLAVE_START_SCRIPT}" | crontab -u azureuser -
 
 

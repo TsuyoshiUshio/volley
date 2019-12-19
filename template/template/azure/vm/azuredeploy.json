@@ -46,13 +46,13 @@
             "defaultValue": "jmeterNSG",
             "type": "string"
         },
-        "slaveCount":{
+        "slaveCount": {
             "type": "int",
             "defaultValue": 2,
             "minValue": 1,
             "maxValue": 9,
             "metadata": {
-                "description" : "Will determine the number of slave nodes created. Defaulted to 2 , with a min node count of 1 and max of 9."
+                "description": "Will determine the number of slave nodes created. Defaulted to 2 , with a min node count of 1 and max of 9."
             }
         }
     },
@@ -78,10 +78,99 @@
     },
     "resources": [
         {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('networkSecurityGroups_jmeterNSG_name')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "Port_38080",
+                        "properties": {
+                            "description": "JMeter Server Access Port",
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "38080",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "SSH_22",
+                        "properties": {
+                            "description": "SSH Access to VMS",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 110,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_jmeterNSG_name'), '/Port_38080')]",
+            "properties": {
+                "description": "JMeter Server Access Port",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "38080",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 100,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2019-09-01",
+            "name": "[concat(parameters('networkSecurityGroups_jmeterNSG_name'), '/SSH_22')]",
+            "properties": {
+                "description": "SSH Access to VMS",
+                "protocol": "Tcp",
+                "sourcePortRange": "*",
+                "destinationPortRange": "22",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 110,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
             "apiVersion": "2019-09-01",
             "type": "Microsoft.Network/virtualNetworks",
             "name": "[variables('virtualNetworkName')]",
             "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
+              ],
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -92,7 +181,10 @@
                     {
                         "name": "[variables('subnetName')]",
                         "properties": {
-                            "addressPrefix": "[variables('subnetPrefix')]"
+                            "addressPrefix": "[variables('subnetPrefix')]",
+                            "networkSecurityGroup":{
+                               "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
+                            }
                         }
                     }
                 ]
@@ -114,8 +206,8 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "parameters":{},
-                    "variables":{},
+                    "parameters": {},
+                    "variables": {},
                     "resources": [
                         {
                             "apiVersion": "2019-09-01",
@@ -123,7 +215,7 @@
                             "name": "[concat(variables('publicIPAddressName'),copyIndex(1))]",
                             "location": "[resourceGroup().location]",
                             "properties": {
-                                "publicIPAllocationMethod":"[variables('publicIPAddressType')]" 
+                                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
                             }
                         },
                         {
@@ -169,14 +261,14 @@
                                     "linuxConfiguration": {
                                         "disablePasswordAuthentication": true,
                                         "ssh": {
-                                          "publicKeys": [
-                                            {
-                                              "path": "[variables('sshKeyPath')]",
-                                              "keyData": "[parameters('sshKeyData')]"
-                                            }
-                                          ]
+                                            "publicKeys": [
+                                                {
+                                                    "path": "[variables('sshKeyPath')]",
+                                                    "keyData": "[parameters('sshKeyData')]"
+                                                }
+                                            ]
                                         }
-                                      }
+                                    }
                                 },
                                 "storageProfile": {
                                     "imageReference": {
@@ -204,8 +296,7 @@
                             "apiVersion": "2017-12-01",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                  "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmName'), copyIndex(1)))]"
-                
+                                "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmName'), copyIndex(1)))]"
                             ],
                             "properties": {
                                 "publisher": "Microsoft.Azure.Extensions",
@@ -240,8 +331,8 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "parameters":{},
-                    "variables":{},
+                    "parameters": {},
+                    "variables": {},
                     "resources": [
                         {
                             "apiVersion": "2019-09-01",
@@ -249,7 +340,7 @@
                             "name": "[concat(variables('publicIPAddressName'),copyIndex(2))]",
                             "location": "[resourceGroup().location]",
                             "properties": {
-                                "publicIPAllocationMethod":"[variables('publicIPAddressType')]" 
+                                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
                             }
                         },
                         {
@@ -295,14 +386,14 @@
                                     "linuxConfiguration": {
                                         "disablePasswordAuthentication": true,
                                         "ssh": {
-                                          "publicKeys": [
-                                            {
-                                              "path": "[variables('sshKeyPath')]",
-                                              "keyData": "[parameters('sshKeyData')]"
-                                            }
-                                          ]
+                                            "publicKeys": [
+                                                {
+                                                    "path": "[variables('sshKeyPath')]",
+                                                    "keyData": "[parameters('sshKeyData')]"
+                                                }
+                                            ]
                                         }
-                                      }
+                                    }
                                 },
                                 "storageProfile": {
                                     "imageReference": {
@@ -330,8 +421,7 @@
                             "apiVersion": "2017-12-01",
                             "location": "[resourceGroup().location]",
                             "dependsOn": [
-                                  "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmName'), copyIndex(2)))]"
-                
+                                "[resourceId('Microsoft.Compute/virtualMachines', concat(variables('vmName'), copyIndex(2)))]"
                             ],
                             "properties": {
                                 "publisher": "Microsoft.Azure.Extensions",
@@ -349,110 +439,6 @@
                     ]
                 }
             }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-09-01",
-            "name": "[parameters('networkSecurityGroups_jmeterNSG_name')]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "Port_38080",
-                        "properties": {
-                            "description": "JMeter Server Access Port",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "38080",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 100,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    },
-                    {
-                        "name": "SSH_22",
-                        "properties": {
-                            "description": "SSH Access to VMS",
-                            "protocol": "TCP",
-                            "sourcePortRange": "*",
-                            "destinationPortRange": "22",
-                            "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
-                            "access": "Allow",
-                            "priority": 110,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-            "apiVersion": "2019-09-01",
-            "name": "[concat(parameters('networkSecurityGroups_jmeterNSG_name'), '/Port_38080')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
-            ],
-            "properties": {
-                "description": "JMeter Server Access Port",
-                "protocol": "TCP",
-                "sourcePortRange": "*",
-                "destinationPortRange": "38080",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 100,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
-            "apiVersion": "2019-09-01",
-            "name": "[concat(parameters('networkSecurityGroups_jmeterNSG_name'), '/SSH_22')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
-            ],
-            "properties": {
-                "description": "SSH Access to VMS",
-                "protocol": "TCP",
-                "sourcePortRange": "*",
-                "destinationPortRange": "22",
-                "sourceAddressPrefix": "*",
-                "destinationAddressPrefix": "*",
-                "access": "Allow",
-                "priority": 110,
-                "direction": "Inbound",
-                "sourcePortRanges": [],
-                "destinationPortRanges": [],
-                "sourceAddressPrefixes": [],
-                "destinationAddressPrefixes": []
-            }
-        },
-        {
-            "apiVersion": "2018-03-01",
-            "type": "Microsoft.Network/virtualNetworks/subnets",
-            "name": "[concat(variables('virtualNetworkName'), '/', variables('subnetName'))]",
-            "location": "[resourceGroup().location]",
-            "properties": {
-              "addressPrefix": "[variables('addressPrefix')]",
-              "networkSecurityGroup": {
-                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_jmeterNSG_name'))]"
-              }
-            }
-          }
+        }
     ]
 }

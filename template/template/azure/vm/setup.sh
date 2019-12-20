@@ -124,14 +124,14 @@ echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> /home/azureuser/.bashrc
 cd /home/azureuser
 # install volley
 GET_VOLLEY=get_volley.sh
-curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/master/script/get_volley.sh -o $GET_VOLLEY
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/${GIT_BRANCH}/script/get_volley.sh -o $GET_VOLLEY
 chmod +x $GET_VOLLEY
 chown azureuser $GET_VOLLEY
 chgrp azureuser $GET_VOLLEY
 sudo -u azureuser ./get_volley.sh
 
 VOLLEY_START_SCRIPT=/home/azureuser/start_volley.sh
-curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/master/script/start_volley.sh -o $VOLLEY_START_SCRIPT
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/${GIT_BRANCH}/script/start_volley.sh -o $VOLLEY_START_SCRIPT
 chmod +x $VOLLEY_START_SCRIPT
 chown azureuser $VOLLEY_START_SCRIPT
 chgrp azureuser $VOLLEY_START_SCRIPT
@@ -139,7 +139,7 @@ chgrp azureuser $VOLLEY_START_SCRIPT
 # Start volley server
 # Add cron for enabling start volley server when it starts
 
-sudo -u azureuser $VOLLEY_START_SCRIPT
+sudo -u azureuser --preserve-env=PATH,JAVA_HOME $VOLLEY_START_SCRIPT
 echo "@reboot ${VOLLEY_START_SCRIPT}" | crontab -u azureuser -
 
 # Slave:

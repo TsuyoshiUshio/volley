@@ -307,7 +307,7 @@
                                     "fileUris": [
                                         "[variables('gitUri')]"
                                     ],
-                                    "commandToExecute": "sh setup.sh"
+                                    "commandToExecute": "[concat('GIT_BRANCH=', parameters('gitBranch'), ' sh setup.sh')]"
                                 }
                             }
                         }
@@ -432,7 +432,7 @@
                                     "fileUris": [
                                         "[variables('gitUriSlave')]"
                                     ],
-                                    "commandToExecute": "sh setupslave.sh"
+                                    "commandToExecute": "[concat('GIT_BRANCH=', parameters('gitBranch'), ' sh setupslave.sh')]"
                                 }
                             }
                         }

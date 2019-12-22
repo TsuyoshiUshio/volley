@@ -99,6 +99,10 @@ wget http://www-us.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSIO
 wget https://jmeter-plugins.org/files/packages/jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip
 unzip -o jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip -d ${JMETER_HOME}
 
+# Disable Rmi SSL option
+sed -i.bak -e "s/#server.rmi.ssl.disable=false/server.rmi.ssl.disable=true/" ${JMETER_HOME}/bin/jmeter.properties
+
+# Clean up
 
 sudo DEBIAN_FRONTEND=noninteractive rm -rf apache-jmeter-${JMETER_VERSION}.tgz \
             jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip \

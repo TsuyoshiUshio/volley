@@ -121,19 +121,36 @@ USAGE:
    volley run [command options] [arguments...]
 
 OPTIONS:
-   --config-id value, -c value  Specify config-id that is created by config command.
-   --master value, -m value     Specify master ip address or domain name.
-   --port value, -p value       Specify master port. 38080 by default (default: "38080")
-   --wait, -w                   Make this subcommand wait for completion (default: false)
-   --timeout value, -t value    Specify the default timeout in minutes if you use --wait (-w) flag (default: 30)
-   --help, -h                   show help (default: false)
+   --config-id value, -c value          Specify config-id that is created by config command.
+   --master value, -m value             Specify master ip address or domain name.
+   --port value, -p value               Specify master port. 38080 by default (default: "38080")
+   --wait, -w                           Make this subcommand wait for completion (default: false)
+   --timeout value, -t value            Specify the default timeout in minutes if you use --wait (-w) flag (default: 30)
+   --output-type value, -o value        Specify the how to output the job_id. Possible value is 'stdout', 'file', 'both', if you choose file or both, it will output as file. The file name will respect outpus-filename flag (default: "stdout")
+   --output-filename value, --of value  Specify the output filename when you specify --output-type flag (default: "job.json")
+   --help, -h                           show help (default: false)
 ```
 
 #### sample
 
+Non broking run mode.
+
 ```bash
 $ volley run --config-id c0234dff-1b18-11ea-bd0d-00155d7fe159 --master http://localhost 
 {"config_id":"c0234dff-1b18-11ea-bd0d-00155d7fe159","job_id":"4d93ea23-1b19-11ea-bd0d-00155d7fe159"}
+```
+
+Broking run mode. 
+
+```bash
+./volley run -c 929715c6-2454-11ea-a403-00249b32d3f7  -m http://localhost -w -o both -of myjob.json
+{"config_id":"929715c6-2454-11ea-a403-00249b32d3f7","job_id":"a4568d8b-2454-11ea-a403-00249b32d3f7"}
+
+Waiting for Job completion...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 5.0016115s second ...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 10.0037235s second ...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 15.0054866s second ...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 20.0075305s second ...
 ```
 
 ### Log

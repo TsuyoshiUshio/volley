@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/TsuyoshiUshio/volley/pkg/model"
@@ -20,9 +21,9 @@ func (s *RunCommand) Run(c *cli.Context) error {
 	configID := c.String("config-id")
 	masterIP := c.String("master")
 	port := c.String("port")
-	if port == "" {
-		port = "38080"
-	}
+	outputFileType := c.String("output-type")
+	outputFileName := c.String("output-filename")
+
 	requestBody, err := json.Marshal(&model.Config{
 		ID: configID,
 	})
@@ -38,18 +39,28 @@ func (s *RunCommand) Run(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(body))
+
+	if outputFileType == "stdout" || outputFileType == "both" {
+		fmt.Println(string(body))
+	}
+	if outputFileType == "file" || outputFileType == "both" {
+		ioutil.WriteFile(outputFileName, body, os.ModePerm)
+	}
 
 	if c.Bool("wait") {
 		timeoutDuration := c.Int("timeout")
 
 		var jobRequest model.JobRequest
 		json.Unmarshal(body, &jobRequest)
+
 		ch := make(chan string, 1)
 		go func() {
 			status := waitForCompletion(masterIP, port, jobRequest.JobID)
 			ch <- status
 		}()
+
+		quit := make(chan os.Signal)
+		signal.Notify(quit, os.Interrupt)
 
 		select {
 		case status := <-ch:
@@ -57,6 +68,9 @@ func (s *RunCommand) Run(c *cli.Context) error {
 				os.Exit(1) // If the status is failed, exit with 1.
 			}
 			fmt.Println("Done.")
+		case <-quit:
+			fmt.Println("interrupted by SIGINT.")
+			os.Exit(130)
 		case <-time.After(time.Duration(timeoutDuration) * time.Minute):
 			fmt.Printf("timeout! : %d minutes.\n", timeoutDuration)
 		}

@@ -71,6 +71,18 @@ func main() {
 						Value:   30,
 						Usage:   "Specify the default timeout in minutes if you use --wait (-w) flag",
 					},
+					&cli.StringFlag{
+						Name:    "output-type",
+						Aliases: []string{"o"},
+						Value:   "stdout",
+						Usage:   "Specify the how to output the job_id. Possible value is 'stdout', 'file', 'both', if you choose file or both, it will output as file. The file name will respect outpus-filename flag",
+					},
+					&cli.StringFlag{
+						Name:    "output-filename",
+						Aliases: []string{"of"},
+						Value:   "job.json",
+						Usage:   "Specify the output filename when you specify --output-type flag",
+					},
 				},
 			}, {
 				Name:    "config",

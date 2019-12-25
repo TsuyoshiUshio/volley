@@ -23,9 +23,11 @@ func (s *RunCommand) Run(c *cli.Context) error {
 	port := c.String("port")
 	outputFileType := c.String("output-type")
 	outputFileName := c.String("output-filename")
+	isDistributed := c.Bool("distributed-testing")
 
-	requestBody, err := json.Marshal(&model.Config{
-		ID: configID,
+	requestBody, err := json.Marshal(&model.JobRequest{
+		ConfigID:      configID,
+		IsDistributed: isDistributed,
 	})
 	if err != nil {
 		return err
@@ -50,12 +52,12 @@ func (s *RunCommand) Run(c *cli.Context) error {
 	if c.Bool("wait") {
 		timeoutDuration := c.Int("timeout")
 
-		var jobRequest model.JobRequest
-		json.Unmarshal(body, &jobRequest)
+		var jobResponse model.JobResponse
+		json.Unmarshal(body, &jobResponse)
 
 		ch := make(chan string, 1)
 		go func() {
-			status := waitForCompletion(masterIP, port, jobRequest.JobID)
+			status := waitForCompletion(masterIP, port, jobResponse.JobID)
 			ch <- status
 		}()
 

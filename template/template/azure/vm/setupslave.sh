@@ -130,8 +130,8 @@ chown azureuser $GET_VOLLEY
 chgrp azureuser $GET_VOLLEY
 sudo -u azureuser ./get_volley.sh
 
-VOLLEY_START_SCRIPT=/home/azureuser/start_volley.sh
-curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/${GIT_BRANCH}/script/start_volley.sh -o $VOLLEY_START_SCRIPT
+VOLLEY_START_SCRIPT=/home/azureuser/start_volley_slave.sh
+curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/${GIT_BRANCH}/script/start_volley_slave.sh -o $VOLLEY_START_SCRIPT
 chmod +x $VOLLEY_START_SCRIPT
 chown azureuser $VOLLEY_START_SCRIPT
 chgrp azureuser $VOLLEY_START_SCRIPT
@@ -139,8 +139,10 @@ chgrp azureuser $VOLLEY_START_SCRIPT
 # Start volley server
 # Add cron for enabling start volley server when it starts
 
-#sudo -u azureuser $VOLLEY_START_SCRIPT
-#echo "@reboot ${VOLLEY_START_SCRIPT}" | crontab -u azureuser -
+sudo -u azureuser --preserve-env=PATH,JAVA_HOME $VOLLEY_START_SCRIPT
+
+echo "PATH=${PATH}" | crontab -u azureuser -
+(crontab -l 2>/dev/null; echo "@reboot ${VOLLEY_START_SCRIPT}") | crontab -u azureuser -
 
 # Slave:
 # Start JMeter server
@@ -150,8 +152,13 @@ chgrp azureuser $VOLLEY_START_SCRIPT
  chmod +x $JMETER_SLAVE_START_SCRIPT
  chown azureuser $JMETER_SLAVE_START_SCRIPT
  chgrp azureuser $JMETER_SLAVE_START_SCRIPT
+
+# Add csv directory as a path on JMeter for volley
+ export PATH=$PATH:/home/azureuser/csv
  sudo -u azureuser --preserve-env=PATH,JAVA_HOME $JMETER_SLAVE_START_SCRIPT
- echo "@reboot ${JMETER_SLAVE_START_SCRIPT}" | crontab -u azureuser -
+
+ echo "PATH=${PATH}" | crontab -u azureuser -
+ (crontab -l 2>/dev/null; echo "@reboot ${JMETER_SLAVE_START_SCRIPT}") | crontab -u azureuser -
 
 
 # /bin/bash -c 'docker run -d --name docker-daemon --privileged docker:stable-dind &'

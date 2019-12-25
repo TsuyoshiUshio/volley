@@ -9,8 +9,8 @@ import (
 )
 
 func Start(c *gin.Context) {
-	var config model.Config
-	if err := c.ShouldBindJSON(&config); err != nil {
+	var request model.JobRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -21,7 +21,7 @@ func Start(c *gin.Context) {
 		return
 	}
 
-	runContext := provider.NewRunContext(config.ID, job_id.String(), c.GetBool("distributed-testing"))
+	runContext := provider.NewRunContext(request.ConfigID, job_id.String(), request.IsDistributed)
 	p := provider.NewAzureProvider()
 
 	go func() {
@@ -30,7 +30,7 @@ func Start(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{
 		"job_id":    job_id.String(),
-		"config_id": config.ID,
+		"config_id": request.ConfigID,
 	})
 
 	return

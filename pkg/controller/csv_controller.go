@@ -2,6 +2,7 @@ package controller
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -19,8 +20,14 @@ func UploadCSV(c *gin.Context) {
 		err = os.MkdirAll(csvPath, os.ModePerm)
 	}
 	for _, file := range files {
-		log.Println(file.Filename)
-		dist := filepath.Join(csvPath, file.Filename)
-		c.SaveUploadedFile(file, dist)
+		fileName := filepath.Base(file.Filename)
+		log.Println(fileName)
+		dist := filepath.Join(csvPath, fileName)
+		err := c.SaveUploadedFile(file, dist)
+		if err != nil {
+			log.Printf("Csv File upload error: %v", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 	}
+	c.JSON(http.StatusOK, gin.H{"status": "success"})
 }

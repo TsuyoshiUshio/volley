@@ -221,7 +221,7 @@ func transferCSVFilesToSlaveIfJMeterPropertyJSONExists(configDirPath string) err
 
 func postMultipartTotheSlaves(contentType string, body []byte) error {
 	jmeterConfigJSONPath := filepath.Join(".", model.JMeterPropertyDir, model.JMeterPropertyJSON)
-	if _, err := os.Stat(jmeterConfigJSONPath); err != nil {
+	if _, err := os.Stat(jmeterConfigJSONPath); err == nil {
 		// JMeterConfig JSON exists
 		file, err := ioutil.ReadFile(jmeterConfigJSONPath)
 		if err != nil {

@@ -140,7 +140,8 @@ chgrp azureuser $VOLLEY_START_SCRIPT
 # Add cron for enabling start volley server when it starts
 
 sudo -u azureuser --preserve-env=PATH,JAVA_HOME $VOLLEY_START_SCRIPT
-echo "@reboot ${VOLLEY_START_SCRIPT}" | crontab -u azureuser -
+echo "PATH=${PATH}" | crontab -u azureuser -
+(crontab -l 2>/dev/null; echo "@reboot ${VOLLEY_START_SCRIPT}") | crontab -u azureuser -
 
 # Slave:
 # Start JMeter server

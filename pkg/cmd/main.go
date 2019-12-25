@@ -33,6 +33,12 @@ func main() {
 				},
 			},
 			{
+				Name:    "slave-server",
+				Aliases: []string{"ss"},
+				Usage:   "API Server for receive csv files on slave server",
+				Action:  (&command.SlaveServerCommand{}).Start,
+			},
+			{
 				Name:    "server",
 				Aliases: []string{"s"},
 				Usage:   "API Server for uploading/receiving files",
@@ -82,6 +88,11 @@ func main() {
 						Aliases: []string{"of"},
 						Value:   "job.json",
 						Usage:   "Specify the output filename when you specify --output-type flag",
+					},
+					&cli.BoolFlag{
+						Name:    "distributed-testing",
+						Aliases: []string{"d"},
+						Usage:   "Enable distributed testing",
 					},
 				},
 			}, {

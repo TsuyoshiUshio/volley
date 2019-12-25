@@ -1,9 +1,14 @@
 package provider
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"log"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -20,9 +25,9 @@ type Provider interface {
 type AzureProvider struct {
 }
 type RunContext struct {
-	ConfigID    string
-	JobID       string
-	JmxFileName string
+	ConfigID      string
+	JobID         string
+	IsDistributed bool
 }
 
 type StatusCheckContext struct {
@@ -39,10 +44,11 @@ func NewStatusCheckContext(jobID string) *StatusCheckContext {
 	}
 }
 
-func NewRunContext(configID string, jobID string) *RunContext {
+func NewRunContext(configID string, jobID string, isDistributed bool) *RunContext {
 	return &RunContext{
-		ConfigID: configID,
-		JobID:    jobID,
+		ConfigID:      configID,
+		JobID:         jobID,
+		IsDistributed: isDistributed,
 	}
 }
 func (p *AzureProvider) StatusCheck(context *StatusCheckContext) (*model.Status, error) {
@@ -81,17 +87,17 @@ func (p *AzureProvider) Run(context *RunContext) error {
 	logPath := filepath.Join(jobPath, "stress.log")
 	reportPath := filepath.Join(jobPath, "report")
 
-	var cmd *exec.Cmd
-
-	if runtime.GOOS == "windows" {
-		commandPath, err := exec.LookPath("jmeter.bat")
+	// Transfer csv files to the Slave not if necessary
+	if context.IsDistributed {
+		err = transferCSVFilesToSlaveIfJMeterPropertyJSONExists(configDirPath)
 		if err != nil {
 			return err
 		}
-		cmd = exec.Command("cmd", "/C", commandPath, "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath)
+	}
 
-	} else {
-		cmd = exec.Command("jmeter", "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath)
+	cmd, err := buildCommand(configFilePath, logPath, reportPath, context.IsDistributed)
+	if err != nil {
+		return err
 	}
 
 	cmd.Stdout = os.Stdout
@@ -112,6 +118,7 @@ func (p *AzureProvider) Run(context *RunContext) error {
 	return nil
 }
 
+// CreateAsset returns Zipped file
 func (p *AzureProvider) CreateAsset(jobID string) ([]byte, error) {
 	dir, err := ioutil.TempDir("", "volley")
 	if err != nil {
@@ -122,6 +129,37 @@ func (p *AzureProvider) CreateAsset(jobID string) ([]byte, error) {
 	zipFilePath := filepath.Join(dir, jobID+".zip")
 	helper.Zip(sourcePath, zipFilePath)
 	return ioutil.ReadFile(zipFilePath)
+}
+
+func buildCommand(configFilePath, logPath, reportPath string, isDistributed bool) (*exec.Cmd, error) {
+	var cmd *exec.Cmd
+
+	jmeterProperty, err := model.NewJMeterProperty()
+	if err != nil && isDistributed {
+		return nil, fmt.Errorf("Can not find Remote_IPs configration. Use property API to configure the settings. error: %v", err)
+	}
+	if isDistributed && jmeterProperty.CommaSeparatedRemoteHostIPs() == "" {
+		return nil, fmt.Errorf("Remote_IPs configuration is empty. Use property API to configure the settings")
+	}
+
+	if runtime.GOOS == "windows" {
+		commandPath, err := exec.LookPath("jmeter.bat")
+		if err != nil {
+			return nil, err
+		}
+		if isDistributed {
+			cmd = exec.Command("cmd", "/C", commandPath, "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath, "-R", jmeterProperty.CommaSeparatedRemoteHostIPs())
+		} else {
+			cmd = exec.Command("cmd", "/C", commandPath, "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath)
+		}
+	} else {
+		if isDistributed {
+			cmd = exec.Command("jmeter", "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath, "-R", jmeterProperty.CommaSeparatedRemoteHostIPs())
+		} else {
+			cmd = exec.Command("jmeter", "-n", "-t", configFilePath, "-l", logPath, "-e", "-o", reportPath)
+		}
+	}
+	return cmd, nil
 }
 
 func findJmxFile(directory string) (string, error) {
@@ -137,4 +175,86 @@ func findJmxFile(directory string) (string, error) {
 		}
 	}
 	return "", fmt.Errorf("Can not file jmx file on the config directory: %s", directory)
+}
+
+func transferCSVFilesToSlaveIfJMeterPropertyJSONExists(configDirPath string) error {
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	fieldName := "file"
+	matchCsv := regexp.MustCompile(`.*\.csv`)
+	err := filepath.Walk(configDirPath, func(path string, info os.FileInfo, err error) error {
+		if matchCsv.MatchString(path) {
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			fw, err := mw.CreateFormFile(fieldName, path)
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(fw, file)
+			if err != nil {
+				return err
+			}
+			file.Close()
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	contentType := mw.FormDataContentType()
+	err = mw.Close()
+	if err != nil {
+		return err
+	}
+	body, err := ioutil.ReadAll(buf)
+	if err != nil {
+		return err
+	}
+	err = postMultipartTotheSlaves(contentType, body)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func postMultipartTotheSlaves(contentType string, body []byte) error {
+	jmeterConfigJSONPath := filepath.Join(".", model.JMeterPropertyDir, model.JMeterPropertyJSON)
+	if _, err := os.Stat(jmeterConfigJSONPath); err != nil {
+		// JMeterConfig JSON exists
+		file, err := ioutil.ReadFile(jmeterConfigJSONPath)
+		if err != nil {
+			return err
+		}
+		var jmeterProperty model.JMeterProperty
+		err = json.Unmarshal(file, &jmeterProperty)
+		if err != nil {
+			return err
+		}
+		for _, ipAddress := range jmeterProperty.RemoteHostIPs {
+			err = postToSlave(ipAddress, contentType, body)
+		}
+		return nil
+	} else {
+		// JMeterConfig JSON does not exists
+		return nil
+	}
+}
+
+func postToSlave(iPAddress, contentType string, body []byte) error {
+	url := fmt.Sprintf("http://%s:%s/csv", iPAddress, model.SlaveDefaultPort)
+	buf := &bytes.Buffer{}
+	buf.Write(body)
+	resp, err := http.Post(url, contentType, buf)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	log.Println(string(responseBody))
+	return nil
 }

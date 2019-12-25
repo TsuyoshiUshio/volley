@@ -21,7 +21,7 @@ func Start(c *gin.Context) {
 		return
 	}
 
-	runContext := provider.NewRunContext(config.ID, job_id.String())
+	runContext := provider.NewRunContext(config.ID, job_id.String(), c.GetBool("distributed-testing"))
 	p := provider.NewAzureProvider()
 
 	go func() {

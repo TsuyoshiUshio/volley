@@ -6,7 +6,7 @@
 # Download volley binary
 # https://github.com/TsuyoshiUshio/volley/releases/download/0.0.3/volley-linux-amd64.tgz
 
-VERSION="0.0.4"
+VERSION="0.0.5"
 BINARY_TYPE=""
 ARCHIVE=""
 BINARY=""

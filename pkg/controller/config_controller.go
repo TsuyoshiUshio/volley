@@ -25,8 +25,9 @@ func CreateNewConfig(c *gin.Context) {
 		err = os.MkdirAll(configPath, os.ModePerm)
 	}
 	for _, file := range files {
-		log.Println(file.Filename)
-		dist := filepath.Join(configPath, file.Filename)
+		fileName := filepath.Base(file.Filename)
+		log.Println(fileName)
+		dist := filepath.Join(configPath, fileName)
 		c.SaveUploadedFile(file, dist)
 	}
 	c.JSON(http.StatusOK, &model.Config{

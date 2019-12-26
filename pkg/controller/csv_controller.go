@@ -6,18 +6,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/TsuyoshiUshio/volley/pkg/model"
+	"github.com/TsuyoshiUshio/volley/pkg/helper"
 	"github.com/gin-gonic/gin"
 )
 
 // UploadCSV enalbe us to get the multipart file that is assumed csv file.
-// Save to to the csv dir on the current directory
+// Save to to the bin dir on JMeter.
 func UploadCSV(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["file"]
-	csvPath := filepath.Join(".", model.CsvDir)
+	csvPath := helper.GetJMeterBinDir()
 	if _, err := os.Stat(csvPath); os.IsNotExist(err) {
-		err = os.MkdirAll(csvPath, os.ModePerm)
+		log.Printf("Csv File Upload. Can not find JMETER_BIN direcotry. error: %v", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 	for _, file := range files {
 		fileName := filepath.Base(file.Filename)

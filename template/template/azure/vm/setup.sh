@@ -90,12 +90,12 @@ set -eux; \
 # Inspired by this image https://hub.docker.com/r/cirit/jmeter
 
 export JMETER_VERSION=5.2
-export JMETER_HOME=/usr/local/apache-jmeter-${JMETER_VERSION}
+export JMETER_HOME=/home/azureuser/apache-jmeter-${JMETER_VERSION}
 export PATH=${JMETER_HOME}/bin:${PATH}
 export CUSTOM_PLUGIN_VERSION=2.9
 
 wget http://www-us.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz && \
-	tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /usr/local/
+	tar -xzf apache-jmeter-${JMETER_VERSION}.tgz -C /home/azureuser/
 wget https://jmeter-plugins.org/files/packages/jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip
 unzip -o jpgc-casutg-${CUSTOM_PLUGIN_VERSION}.zip -d ${JMETER_HOME}
 
@@ -117,13 +117,17 @@ sudo DEBIAN_FRONTEND=noninteractive rm -rf apache-jmeter-${JMETER_VERSION}.tgz \
 	apt-get -y clean && \
 	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# log directory creation
+# log directory creation TODO Delete if it is not used.
 mkdir -p /home/azureuser/logs
 
 # Adding environment variables setup to azureuser
 echo "# JMeter setup" >> /home/azureuser/.bashrc
 echo "export JAVA_HOME=${JAVA_HOME}" >> /home/azureuser/.bashrc
 echo "export PATH=${JMETER_HOME}/bin:${PATH}" >> /home/azureuser/.bashrc
+
+# change owner of JMeter
+chown -R azureuser $JMETER_HOME
+chgrp -R azureuser $JMETER_HOME
 
 cd /home/azureuser
 # install volley

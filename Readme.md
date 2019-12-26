@@ -159,7 +159,7 @@ Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running a
 Run with distributed testing
 
 For enabling distributed testing, you need to post request to `/properties` with RemoteIP address of slaves. 
-Then execute `volley run` command. 
+Then execute `volley run` command. If you want to enable `-d` flag, you need to start `volley --slave-server` on slave machine. If you request distributed testing, befor run `jmeter`, server send csv files to slaver servers then execute `jmeter` command with distiruted testing option. 
 
 ```bash
 $ curl -X POST -H "Content-Type: application/json" -d '{"remote_host_ips":["10.0.0.4", "10.0.0.5"]}' http://${MASTER_IP}:38080/property

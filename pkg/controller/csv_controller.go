@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/TsuyoshiUshio/volley/pkg/helper"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +14,7 @@ import (
 func UploadCSV(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["file"]
-	csvPath := helper.GetJMeterBinDir()
+	csvPath := "." // should be the same current directory as jmeter-server on slave.
 	if _, err := os.Stat(csvPath); os.IsNotExist(err) {
 		log.Printf("Csv File Upload. Can not find JMETER_BIN direcotry. error: %v", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

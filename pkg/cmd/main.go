@@ -174,6 +174,12 @@ func main() {
 					},
 				},
 			},
+			{
+				Name:    "version",
+				Aliases: []string{"v"},
+				Usage:   "Version of this volley binary",
+				Action:  (&command.VersionCommand{}).Show,
+			},
 		},
 	}
 

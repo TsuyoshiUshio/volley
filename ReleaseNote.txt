@@ -1,11 +1,10 @@
-# Release 0.0.3 
+# Release 0.0.4 
 
 This release is include 
 
-* Create ARM template for deploying JMeter Cluster
-* Update the startup script 
-* get-volley.sh script for enabling easy to install volley
-* Build Breaker
-* Wait option with timeout on run sub command
+* Enable Distributed Testing
+* Create Slave Server for accept csv files and save under csv directory
+* Add Distributed Testing option on run command. 
+* Change for enabling Distributed Testing on server 
 
 

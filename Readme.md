@@ -114,6 +114,7 @@ $ volley config --directory . --master http://localhost
 Run the JMeter with the configuration you uploaded on the server side. 
 
 ```
+$ ./volley run --help
 NAME:
    volley run - Run JMeter
 
@@ -126,8 +127,10 @@ OPTIONS:
    --port value, -p value               Specify master port. 38080 by default (default: "38080")
    --wait, -w                           Make this subcommand wait for completion (default: false)
    --timeout value, -t value            Specify the default timeout in minutes if you use --wait (-w) flag (default: 30)
-   --output-type value, -o value        Specify the how to output the job_id. Possible value is 'stdout', 'file', 'both', if you choose file or both, it will output as file. The file name will respect outpus-filename flag (default: "stdout")
+   --output-type value, -o value        Specify the how to output the job_id. Possible value is 'stdout', 'file', 'both', if you choose file or both, it will output as file. The file name will respect outpus-filename flag (default: 
+"stdout")
    --output-filename value, --of value  Specify the output filename when you specify --output-type flag (default: "job.json")
+   --distributed-testing, -d            Enable distributed testing (default: false)
    --help, -h                           show help (default: false)
 ```
 
@@ -152,6 +155,24 @@ Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running a
 Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 15.0054866s second ...
 Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 20.0075305s second ...
 ```
+
+Run with distributed testing
+
+For enabling distributed testing, you need to post request to `/properties` with RemoteIP address of slaves. 
+Then execute `volley run` command. 
+
+```bash
+$ curl -X POST -H "Content-Type: application/json" -d '{"remote_host_ips":["10.0.0.4", "10.0.0.5"]}' http://${MASTER_IP}:38080/property
+$ volley run -c 929715c6-2454-11ea-a403-00249b32d3f7  -m http://localhost -w -o both -of myjob.json -d
+{"config_id":"929715c6-2454-11ea-a403-00249b32d3f7","job_id":"a4568d8b-2454-11ea-a403-00249b32d3f7"}
+
+Waiting for Job completion...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 5.0016115s second ...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 10.0037235s second ...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 15.0054866s second ...
+Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running at 20.0075305s second ...
+```
+
 
 ### Log
 Fetch the log file and report from Server side. It is extracted on the current directory with the sub directory with job_id. 
@@ -239,6 +260,33 @@ riteria.json
 
 $ echo $?
 0
+```
+### Slave Server
+If you want to have Distributed Testing, you need to run this server on slave machines. This server accept API. Accept `POST /csv` on `38081` port. It receives multipart csv files and saves under `csv` directory. JMeter Slave has some restriction that requires to put csv files on PATH that enable for jmeter.  
+
+```bash
+NAME:
+   volley slave-server - API Server for receive csv files on slave server
+
+USAGE:
+   volley slave-server [command options] [arguments...]
+
+OPTIONS:
+   --help, -h  show help (default: false)
+```
+
+#### sample
+
+```bash
+$ volley ss 
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:   export GIN_MODE=release
+ - using code:  gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /                         --> github.com/TsuyoshiUshio/volley/pkg/command.(*SlaveServerCommand).Start.func1 (3 handlers)
+[GIN-debug] POST   /csv                      --> github.com/TsuyoshiUshio/volley/pkg/controller.UploadCSV (3 handlers)
 ```
 
 ### Destroy (TODO)

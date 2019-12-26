@@ -1,10 +1,8 @@
-# Release 0.0.4 
+# Release 0.0.5 
 
-This release is include 
+Bug fix release
 
-* Enable Distributed Testing
-* Create Slave Server for accept csv files and save under csv directory
-* Add Distributed Testing option on run command. 
-* Change for enabling Distributed Testing on server 
+* Save CSV file to slave with JMETER_BIN directory
+
 
 

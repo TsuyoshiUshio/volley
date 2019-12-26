@@ -1,55 +1,62 @@
 package model
 
 import (
-	"bufio"
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"os"
-	"regexp"
+	"path/filepath"
 	"strings"
 )
 
 const (
+	// JMeterPropertyDir is the directory that include property.json
+	JMeterPropertyDir = "property"
+	// JMeterPropertyJSON is the JSON file that is serialized from JMeterProperty instance.
+	JMeterPropertyJSON = "property.json"
+	// JMeterPropertyFile is the file name of the jmeter.property file
 	JMeterPropertyFile = "jmeter.properties"
 )
 
+// JMeterProperty is a struct that represent updated data of jmeter.properties
 type JMeterProperty struct {
 	RemoteHostIPs []string `json:"remote_host_ips" binding:"required"`
 }
 
-func (p *JMeterProperty) GenerateModifiedProperty(source, destination string) error {
-	// read from source
-	// write to the destination
-	// read the source line by line
-	// if find the match, replace it
-	s, err := os.Open(source)
+// NewJMeterProperty will create an instance from json file on property directory
+func NewJMeterProperty() (*JMeterProperty, error) {
+	jmeterPropertyFilePath := filepath.Join(".", JMeterPropertyDir, JMeterPropertyJSON)
+	b, err := ioutil.ReadFile(jmeterPropertyFilePath)
+	if err != nil {
+		return nil, err
+	}
+	var jmeterProperty JMeterProperty
+	err = json.Unmarshal(b, &jmeterProperty)
+	if err != nil {
+		return nil, err
+	}
+	return &jmeterProperty, nil
+}
+
+// WriteFile write JSON marshalled JMeterProperty
+func (p *JMeterProperty) WriteFile() error {
+	b, err := json.Marshal(*p)
 	if err != nil {
 		return err
 	}
-	defer s.Close()
-
-	if _, err := os.Stat(destination); err == nil {
-		err = os.Remove(destination)
-		if err != nil {
-			return err
-		}
+	jmeterPropertyDirPath := filepath.Join(".", JMeterPropertyDir)
+	if _, err := os.Stat(jmeterPropertyDirPath); os.IsNotExist(err) {
+		err = os.MkdirAll(jmeterPropertyDirPath, os.ModePerm)
 	}
+	jmeterPropertyJSONPath := filepath.Join(jmeterPropertyDirPath, JMeterPropertyJSON)
 
-	d, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE, 0644)
+	err = ioutil.WriteFile(jmeterPropertyJSONPath, b, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	defer d.Close()
-
-	scanner := bufio.NewScanner(s)
-	r := regexp.MustCompile(`^remote_hosts=.*$`)
-	for scanner.Scan() {
-		line := scanner.Text()
-		if r.MatchString(line) {
-			fmt.Fprintln(d, "remote_hosts="+strings.Join(p.RemoteHostIPs, ","))
-		} else {
-			fmt.Fprintln(d, line)
-		}
-	}
-
 	return nil
+}
+
+// CommaSeparatedRemoteHostIPs is string representation of RemoteHostIPs
+func (p *JMeterProperty) CommaSeparatedRemoteHostIPs() string {
+	return strings.Join(p.RemoteHostIPs, ",")
 }

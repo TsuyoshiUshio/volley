@@ -1,65 +1,48 @@
 package model
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"os"
-	"regexp"
-	"runtime"
-	"strings"
+	"path/filepath"
 	"testing"
 
-	"github.com/andreyvit/diff"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestJMeterProperty_GenerateModifiedProperty(t *testing.T) {
-
-	sourcePath := "test-data/jmeter-property/jmeter.properties"
-	destinationPath := "jmeter.properties"
-	jp := &JMeterProperty{
-		RemoteHostIPs: []string{"10.0.0.1", "10.0.0.2"},
+func TestJMeterProperty_WriteFile(t *testing.T) {
+	inputJMeterProperty := &JMeterProperty{
+		RemoteHostIPs: []string{"10.0.0.4", "10.0.0.5"},
 	}
-	jp.GenerateModifiedProperty(sourcePath, destinationPath)
-	source, err := readFile(sourcePath)
-	if err != nil {
-		panic(err)
-	}
-	if runtime.GOOS == "windows" {
-		source = strings.NewReplacer("\r\n", "\n").Replace(source)
-	}
-	destination, err := readFile(destinationPath)
-	if err != nil {
-		panic(err)
-	}
-	result := diffOnly(source, destination)
-	assert.Equal(t, "-remote_hosts=127.0.0.1\n+remote_hosts=10.0.0.1,10.0.0.2\n", result)
-
-	err = os.Remove(destinationPath)
-	if err != nil {
-		panic(err)
-	}
-
+	err := inputJMeterProperty.WriteFile()
+	targetFilePath := filepath.Join(".", JMeterPropertyDir, JMeterPropertyJSON)
+	assert.Nil(t, err)
+	defer os.Remove(targetFilePath)
+	file, err := ioutil.ReadFile(targetFilePath)
+	assert.Nil(t, err)
+	var actualJMeterProperty JMeterProperty
+	json.Unmarshal(file, &actualJMeterProperty)
+	assert.Equal(t, inputJMeterProperty.RemoteHostIPs[0], actualJMeterProperty.RemoteHostIPs[0])
+	assert.Equal(t, inputJMeterProperty.RemoteHostIPs[1], actualJMeterProperty.RemoteHostIPs[1])
 }
 
-func diffOnly(source, destination string) string {
-	r := regexp.MustCompile(`^(\+|\-).*$`)
-	diffs := diff.LineDiffAsLines(source, destination)
-	var d strings.Builder
-	for _, l := range diffs {
-		if r.MatchString(l) {
-			d.WriteString(l)
-			d.WriteString("\n")
-		}
+func TestJMeterProperty_CommaSeparatedRemoteHostIPs_Multi(t *testing.T) {
+	inputJMeterProperty := &JMeterProperty{
+		RemoteHostIPs: []string{"10.0.0.4", "10.0.0.5"},
 	}
-	return d.String()
+	assert.Equal(t, "10.0.0.4,10.0.0.5", inputJMeterProperty.CommaSeparatedRemoteHostIPs())
 }
 
-func readFile(filePath string) (string, error) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return "", err
+func TestJMeterProperty_CommaSeparatedRemoteHostIPs_Single(t *testing.T) {
+	inputJMeterProperty := &JMeterProperty{
+		RemoteHostIPs: []string{"10.0.0.4"},
 	}
-	defer f.Close()
-	b, err := ioutil.ReadAll(f)
-	return string(b), nil
+	assert.Equal(t, "10.0.0.4", inputJMeterProperty.CommaSeparatedRemoteHostIPs())
+}
+
+func TestJMeterProperty_CommaSeparatedRemoteHostIPs_Zero(t *testing.T) {
+	inputJMeterProperty := &JMeterProperty{
+		RemoteHostIPs: []string{},
+	}
+	assert.Equal(t, "", inputJMeterProperty.CommaSeparatedRemoteHostIPs())
 }

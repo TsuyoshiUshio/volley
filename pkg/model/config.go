@@ -2,7 +2,7 @@ package model
 
 // Config is a struct for storing config information of JMeter
 type Config struct {
-	ID string `json:"id" binding:"required"` 
+	ID string `json:"id" binding:"required"`
 }
 
 const (
@@ -10,4 +10,6 @@ const (
 	ConfigDir = "config"
 	// JobDir is a directory that contains job reports
 	JobDir = "job"
+	// CsvDir is a directory that contains csv file that is required jmeter execution.
+	CsvDir = "csv"
 )

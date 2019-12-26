@@ -1,8 +1,8 @@
-# Release 0.0.5 
+# Release 0.0.6 
 
 Bug fix release
 
-* Save CSV file to slave with JMETER_BIN directory
+* Save CSV file to slave with current directory of JMeter Slave servers.
 
 
 

@@ -13,10 +13,6 @@ Also, it assume `success_criteria.json` that specify the threshold of the JMeter
 
 
 ```yaml
-# ASP.NET
-# Build and test ASP.NET projects.
-# Add steps that publish symbols, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/aspnet/build-aspnet-4
 
 trigger:
 - master

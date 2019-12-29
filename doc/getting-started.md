@@ -11,7 +11,7 @@ This getting started guide introduces how to use volley manually. I asusme you u
 You can deploy JMeter Cluster with ARM template. In the near future, it will be wrapped with volley sub command. Currenlty please deploy via Azure CLI. If you don't have Azure CLI, please install it from [here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest). 
 
 ### Create a Resource Group
-The name is "JMeterCluster".
+The sample resrouce group name is "JMeterCluster".
 
 ```bash
 $ az group create -n "JMeterCluster" -l westus

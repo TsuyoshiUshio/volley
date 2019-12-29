@@ -15,9 +15,26 @@ The key feature of Volley are:
 Cloud based load testing was a cool service that enable us not to worry about the Stress Testing enviornment and has a good integration with CI tools. However, it was depricated. I'd like to create a command that does the same thing for us. I create this tool with go lang that is enable us to 
 install/download with a single binary. All you need is just download a binary of your platform and add it to the PATH.
 
+## Getting Started
+
+* [Getting Started Volley](doc/getting-started.md)
+
 ## Install
 
-Go to [Release](https://github.com/TsuyoshiUshio/volley/releases) and find your platform binary. Download it and set the PATH to the binary.
+Go to [Release](https://github.com/TsuyoshiUshio/volley/releases) and find your platform binary. Download it and set the PATH to the binary. 
+
+### get_volley.sh
+
+`get_volley.sh` script enable us to install volley to the linux based machine. It download the latest binary and put the binary into `/usr/bin` directory. The script
+requires user that can use `sudo` command. 
+
+```bash
+$ GET_VOLLEY_SCRIPT=get_volley.sh
+$ curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/master/script/$get_volley.sh -o $GET_VOLLEY_SCRIPT
+$ /bin/bash ${GET_VOLLEY_SCRIPT}
+```
+
+If you use windows and have GitBash, you can use this script as well. However, it just download the latest version. Please put binary some directory in the PATH variables. 
 
 ## Refernce
 

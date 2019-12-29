@@ -36,6 +36,12 @@ $ /bin/bash ${GET_VOLLEY_SCRIPT}
 
 If you use windows and have GitBash, you can use this script as well. However, it just download the latest version. Please put binary some directory in the PATH variables. 
 
+## CI Smaple 
+
+This is the sample of CI pipeline. This example using `Azure Pipeline` however, we don't use `Azure Pipeline` specific feature. So you can easy to modify to other CI systems. 
+
+* [JMeter CI Sample](doc/ci-sample.md)
+
 ## Refernce
 
 ### Provision (TODO)

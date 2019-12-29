@@ -13,7 +13,6 @@ Also, it assume `success_criteria.json` that specify the threshold of the JMeter
 
 
 ```yaml
-
 trigger:
 - master
 

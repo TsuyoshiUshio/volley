@@ -3,17 +3,18 @@
 
 Volley is a command line tool for create/destroy Stress testing environment and help you to run the senario and getting a log with a command line. 
 
-The key feature of Volley are: 
+The key features of Volley are: 
 
-* **Privsioning/Deprovisioning:** Provision/Deplovision Master/Slave cluster of JMeter. Currently, we support Virtual Machine for Azure. However, you can contribute to add other providers. 
-* **Send a scenario:** Send JMX file and data files to the Master.
+* **Provisioning/Deprovisioning:** Provision/Deprovision a JMeter cluster with Master/Slave nodes. Currently, we support deployment of a Virtual Machine cluster in Azure Azure. However, you can contribute to add other providers. 
+* **Send a scenario:** Send a JMX file and data files to the Master.
 * **Run:** Run Stress/Load testing.
 * **Fetch a report:** Fetch a report from the Master. 
-* **Server:** Worked as an API Server on the JMeter master side. Execute Remote JMeter Server from the client request. 
+* **Server:** Works as an API Server on the JMeter master which facilitates the execution of Remote JMeter Server requests from the client machine. 
 
 ## Motivation 
-Cloud based load testing was a cool service that enable us not to worry about the Stress Testing enviornment and has a good integration with CI tools. However, it was depricated. I'd like to create a command that does the same thing for us. I create this tool with go lang that is enable us to 
-install/download with a single binary. All you need is just download a binary of your platform and add it to the PATH.
+Cloud based load testing was a cool service that enabled to create a worry free Stress Testing enviornment which also had good integration with existing CI tools. However, with it's depracation as a service, I decided to create a command line interface (CLI) that offers similar features which is easy to configure, use and is opensource. The tool was created using [GO Lang](https://golang.org/) which enables us to install/download and run the application with a single binary. 
+
+All that is required is downloading a binary (specific to your platform) and adding it to the PATH.
 
 ## Getting Started
 
@@ -25,8 +26,8 @@ Go to [Release](https://github.com/TsuyoshiUshio/volley/releases) and find your 
 
 ### get_volley.sh
 
-`get_volley.sh` script enable us to install volley to the linux based machine. It download the latest binary and put the binary into `/usr/bin` directory. The script
-requires user that can use `sudo` command. 
+The sample script, `get_volley.sh` shows how to install volley to a linux based machine. It downloads the latest binary and moves the binary into `/usr/bin` directory. The script
+requires that the user has privileges to execute the `sudo` command. 
 
 ```bash
 $ GET_VOLLEY_SCRIPT=get_volley.sh
@@ -34,18 +35,18 @@ $ curl -fsSL https://raw.githubusercontent.com/TsuyoshiUshio/volley/master/scrip
 $ /bin/bash ${GET_VOLLEY_SCRIPT}
 ```
 
-If you use windows and have GitBash, you can use this script as well. However, it just download the latest version. Please put binary some directory in the PATH variables. 
+If you use Microsoft Windows and have [GitBash](https://git-scm.com/download/win), you can use this script as well. However, it will just download the latest version. Please make sure to move the binary to a suitable directory and add its location to your PATH variables. 
 
-## CI Smaple 
+## CI Sample 
 
-This is the sample of CI pipeline. This example using `Azure Pipeline` however, we don't use `Azure Pipeline` specific feature. So you can easy to modify to other CI systems. 
+This is an sexample of a CI pipeline. This example uses [`Azure Pipelines`](https://azure.microsoft.com/en-us/services/devops/pipelines/)  however, we don't use any `Azure Pipeline` specific features. So you can easily to modify it to work on other CI systems. 
 
 * [JMeter CI Sample](doc/ci-sample.md)
 
-## Refernce
+## Reference
 
 ### Provision (TODO)
-Create a JMeter Cluster. Currently we support Azure VM. In the future, we can add other providers. 
+Create a JMeter Cluster. (We currenlty support provisioning the infrastructure on Azure VMs. In the future, other providers will be added to support provisioning on `Azure Container Instances`). 
 
 ```
 NAME:
@@ -59,15 +60,16 @@ OPTIONS:
    --slave value, -s value         Specify the number of slaves of JMeter cluster (default: 1)
    --help, -h                      show help (default: false)
 ```
-#### sample
+#### Sample
 
 ```bash
 $ volley provision --cluster-name tsushi --slave 2
 ```
 
 ### Server
-Start the volley API Server. The server port is `38080` by default. It provide several REST API. It is usally used from volley subcommand. 
-You need to start server on the JMeter master server. `provision` subcommand will do it automatically.
+The Volley API Server command can be used to start the volley API Server. The default server port is set to `38080`. The API Server provides several REST APIs which are usually used by volley subcommands. 
+
+The API Server needs to run on the JMeter master server. The volley `provision` subcommand will start an instance for you automatically.
 
 ```
 NAME:
@@ -83,13 +85,13 @@ OPTIONS:
 
 #### REST API
 
-* **Upload config**: `POST  /config`: Upload JMeter Config files. It create a new UUID and create a folder `config/${UUID}` then put the files under the directory.  `parameter`: none `body`: multipart files. `return`: {"id":"${config_id}"}
-* **Run JMeter Job**: `POST  /job` : Start Job that JMeter execution using config_id. It doesn't wait whole execution. It generate job_id start JMeter with the log under `job/${UUID}` directory.  `parameter`: none `body`: {"id":"${config_id}"} `return`:  {"job_id": "${job_id}", "config_id":"${config_id}"}
+* **Upload config**: `POST  /config`: Is used to upload JMeter Config files. It creates a new UUID and creates a folder `config/${UUID}` and moves the configuration into the newly created directory. `parameter`: none `body`: multipart files. `return`: {"id":"${config_id}"}
+* **Run JMeter Job**: `POST  /job` : Starts the Job on the JMeter Server using a config config_id. It runs asynchronously and does not wait the execution to complete. It generates a job_id starts JMeter with the log under `job/${UUID}` directory.  `parameter`: none `body`: {"id":"${config_id}"} `return`:  {"job_id": "${job_id}", "config_id":"${config_id}"}
 * **Update JMeter Property**: `POST /property` : Upload Remote IP hosts (slave) then it will update the default `jmeter.properties` file with the uploaded ip. You can find the modified `jmeter.property` file at the current directory of the `volley server`.  `parameter`: none `body`: {"remote_host_ips": ["${ip_address_1}", "${ip_address_2"}]} `return` : The same structure as the request body.
-* **Check Job Status**: `GET /job/:job_id`: Get the status of a job. status will be found `job/job_id/status.json`. This api return the status. Possible value is `Running`, `Completed`, and `Failed`. `return`: {"status": "${status}"}.
+* **Check Job Status**: `GET /job/:job_id`: Gets the status of a job. status will be found `job/job_id/status.json`. This api returns the status. Possible value is `Running`, `Completed`, and `Failed`. `return`: {"status": "${status}"}.
 * **Download Report**: `GET /asset/:job_id`: Download the result of the job execution. It downloads as a zip file. the fileName will be `${job_id}.zip`
 
-#### sample
+#### Sample
 
 ```bash
 $ volley server
@@ -124,9 +126,9 @@ OPTIONS:
    --help, -h                   show help (default: false)
 ```
 
-#### sample
-Upload the jmx and csv file from the current directory. 
-**NOTE:** Don't put two jmx file on the target directory. It doesn't error. However, volley server execute only one jmx file on `run` subcommand. 
+#### Sample
+Upload the jmx and csv files from the current directory. 
+**NOTE:** Do not put two jmx fils in the target directory. It does not report an error. However, the volley server will execute only one jmx file on `run` subcommand. 
 
 ```bash
 $ volley config --directory . --master http://localhost 
@@ -134,7 +136,7 @@ $ volley config --directory . --master http://localhost
 ```
 
 ### Run
-Run the JMeter with the configuration you uploaded on the server side. 
+Runs JMeter with the configuration you uploaded on the server side. 
 
 ```
 $ ./volley run --help
@@ -157,7 +159,7 @@ OPTIONS:
    --help, -h                           show help (default: false)
 ```
 
-#### sample
+#### Sample
 
 Non broking run mode.
 
@@ -181,8 +183,8 @@ Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running a
 
 Run with distributed testing
 
-For enabling distributed testing, you need to post request to `/properties` with RemoteIP address of slaves. 
-Then execute `volley run` command. If you want to enable `-d` flag, you need to start `volley --slave-server` on slave machine. If you request distributed testing, befor run `jmeter`, server send csv files to slaver servers then execute `jmeter` command with distiruted testing option. 
+To enable distributed testing, you need to post requests to `/properties` with RemoteIP address of the configured JMeter slaves nodes. 
+Then execute the `volley run` command. If you want to enable `-d` flag, you need to insure that you start `volley --slave-server` on slave machine. For distributed testing, send csv files to the slave server/s before running the `jmeter` command with distiruted testing options specified. 
 
 ```bash
 $ curl -X POST -H "Content-Type: application/json" -d '{"remote_host_ips":["10.0.0.4", "10.0.0.5"]}' http://${MASTER_IP}:38080/property
@@ -198,7 +200,7 @@ Polling status for JobID: a4568d8b-2454-11ea-a403-00249b32d3f7 Status: running a
 
 
 ### Log
-Fetch the log file and report from Server side. It is extracted on the current directory with the sub directory with job_id. 
+Fetches the log file and report from the JMeter Server and extracts the content into current directory. The subdirectory will be the job_id of the job in question. 
 
 ```
 NAME:
@@ -214,7 +216,7 @@ OPTIONS:
    --help, -h                show help (default: false)
 ```
 
-#### sample
+#### Sample
 
 ```bash
 $ volley log --job-id 4d93ea23-1b19-11ea-bd0d-00155d7fe159 --master http://localhost 
@@ -225,8 +227,8 @@ report  status.json  stress.log
 
 ### Breaker
 
-Break the build once if the result of the job execution doesn't meet the success criteria. 
-This sub command resturn exit status 1 if it fails. 
+The Breaker breaks the build in the event that the test results for the executing job does not meet the success criteria. 
+This sub command returns exit status 1 if it fails. 
 
 ```bash
 NAME:
@@ -241,7 +243,7 @@ OPTIONS:
    --help, -h                  show help (default: false)
 ```
 
-#### sample
+#### Sample
 
 _success_criteria.json_
 
@@ -256,13 +258,13 @@ _success_criteria.json_
 }
 ```
 
-Execute the volley using sample log file and success_criteria.json.
-The log file's result is 
+Execute volley using the sample log file and success_criteria.json.
+The log file's result resembles the following:
 
 > 2019/12/17 00:29:11 TotalRequest: 3916, Average Latency: 11593, ErrorRatio: 1 % Upto 250 Request Per Second.
 
 
-This sample fails 
+This sample demonstrates the console output in the case of a failure 
 
 ```bash
 $ volley breaker -l pkg/model/test-data/success-criteria/avg-time-error-on-rps/stress.log -c pkg/model/test-data/success-criteria/config/success_criteria.json
@@ -272,7 +274,7 @@ $ volley breaker -l pkg/model/test-data/success-criteria/avg-time-error-on-rps/s
 $ echo $?
 1
 ```
-If you change the `succss_criteria.json`'s avarage latency from 10000 to 20000, it will success. 
+If you change the `succss_criteria.json`'s avarage latency from 10000 to 20000, it will succeed. 
 
 ```bash
 $ ./volley breaker -l pkg/model/test-data/success-criteria/avg-time-error-on-rps/stress.log -c pkg/model/test-data/success-criteria/config/success_c
@@ -285,7 +287,7 @@ $ echo $?
 0
 ```
 ### Slave Server
-If you want to have Distributed Testing, you need to run this server on slave machines. This server accept API. Accept `POST /csv` on `38081` port. It receives multipart csv files and saves under `csv` directory. JMeter Slave has some restriction that requires to put csv files on PATH that enable for jmeter.  
+If you want to have Distributed Testing, you need to run this server on slave machines. This server API accepts requests using  `POST /csv` on port `38081`. It is able to receive multipart csv files and saves them under the `csv` directory. (JMeter Slave servers have some restrictions in that it requires copying csv files in the path that is recorded in the PATH variable created for jmeter.  
 
 ```bash
 NAME:
@@ -298,7 +300,7 @@ OPTIONS:
    --help, -h  show help (default: false)
 ```
 
-#### sample
+#### Sample
 
 ```bash
 $ volley ss 
@@ -318,13 +320,13 @@ $ volley ss
 
 ## TODO 
 
-We are planning these feature as TODO.
+We are planning these feature as TODO  items.
 
 * Provision/Deprovision cluster
-* Wait option for Run for the CI. Wait until the JMeter execution finished on the server side. 
-* Able to omit master parameter. It automatically fetched from the culster deployment. 
-* Able to omit config_id parameter. It automatically set once upload the config. 
-* Secure connection with Server/Client.
+* Wait option for Run for the CI. Wait until the JMeter execution completed on the server side. 
+* Ability to omit master parameter. It should automatically fetch configuration from the cluster deployment. 
+* Ability to omit config_id parameter. It should automatically be set once the config file is uploaded. 
+* Secure connection between Server/Client.
 
 ## Developing Volley
 
@@ -342,7 +344,7 @@ _windows_
 script\build.bat
 ```
 
-### Build For All Platform
+### Build For All Platforms
 
 If you need to build multi platform build, execute this command. 
 Currently only support bash. It works on linux, mac, and windows(git bash)
